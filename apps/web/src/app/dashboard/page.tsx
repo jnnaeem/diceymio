@@ -21,7 +21,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { StatusBadge } from "@/components/dashboard/shared/StatusBadge";
-import { ShoppingCart, RotateCw, ArrowRight } from "lucide-react";
+import { ShoppingCart, ArrowRight, TrendingUp, Globe, Users, Wallet,} from "lucide-react";
+import { StatsCard } from "@/components/admin/StatsCard";
 
 type Stats = {
   totalProducts: number;
@@ -84,64 +85,35 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Cards */}
-      {stats && (
-        <div className="stats-grid">
-          <Link href="/dashboard/products" className="stats-card stats-card-blue">
-            <div className="stats-card-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m7.5 4.27 9 5.15" />
-                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-                <path d="m3.3 7 8.7 5 8.7-5" />
-                <path d="M12 22V12" />
-              </svg>
-            </div>
-            <div className="stats-card-content">
-              <p className="stats-card-label">Total Products</p>
-              <p className="stats-card-value">{stats.totalProducts}</p>
-            </div>
-          </Link>
-
-          <Link href="/dashboard/orders" className="stats-card stats-card-indigo">
-            <div className="stats-card-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="8" cy="21" r="1" />
-                <circle cx="19" cy="21" r="1" />
-                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-              </svg>
-            </div>
-            <div className="stats-card-content">
-              <p className="stats-card-label">Total Orders</p>
-              <p className="stats-card-value">{stats.totalOrders}</p>
-            </div>
-          </Link>
-
-          <Link href="/dashboard/customers" className="stats-card stats-card-emerald">
-            <div className="stats-card-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-            </div>
-            <div className="stats-card-content">
-              <p className="stats-card-label">Total Customers</p>
-              <p className="stats-card-value">{stats.totalCustomers}</p>
-            </div>
-          </Link>
-
-          <div className="stats-card stats-card-amber">
-            <div className="stats-card-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" x2="12" y1="2" y2="22" />
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-              </svg>
-            </div>
-            <div className="stats-card-content">
-              <p className="stats-card-label">Total Revenue</p>
-              <p className="stats-card-value">${stats.totalRevenue.toFixed(2)}</p>
-            </div>
-          </div>
+      {!stats ? (
+        <div className="rounded-lg border bg-muted/50 p-6 text-center">
+          <p className="text-muted-foreground">No sales data available</p>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <StatsCard
+            title="Total Products"
+            value={stats.totalProducts}
+            icon={Globe}
+            to="/dashboard/products"
+          />
+          <StatsCard
+            title="Total Orders"
+            value={stats.totalOrders}
+            icon={TrendingUp}
+            to="/dashboard/orders"
+          />
+          <StatsCard
+            title="Total Customers"
+            value={stats.totalCustomers}
+            icon={Users}
+            to="/dashboard/customers"
+          />
+          <StatsCard
+            title="Total Revenue"
+            value={stats.totalRevenue.toFixed(2)}
+            icon={Wallet}
+          />
         </div>
       )}
 

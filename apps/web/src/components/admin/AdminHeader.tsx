@@ -1,113 +1,97 @@
 "use client";
 
-import { useAuthStore } from "@/store/authStore";
-import { useRouter } from "next/navigation";
-import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { Search, ExternalLink, Moon, Sun, Maximize } from "lucide-react";
+import ProfileDropdown from "./ProfileDropdown";
+import NotificationDropdown from "./NotificationDropdown";
+
+interface HeaderProps {
+  isSidebarCollapsed: boolean;
+  setIsSidebarCollapsed: (collapsed: boolean) => void;
+  isSheetOpen: boolean;
+  setIsSheetOpen: (open: boolean) => void;
+}
 
 export default function AdminHeader({
-  onMenuClick,
-  collapsed,
-  onToggle,
-}: {
-  onMenuClick: () => void;
-  collapsed: boolean;
-  onToggle: () => void;
-}) {
-  const { user, logout } = useAuthStore();
-  const router = useRouter();
-  const [profileOpen, setProfileOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setProfileOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleLogout = () => {
-    logout();
-    router.push("/");
-  };
-
-  const initials = user?.firstName
-    ? user.firstName[0].toUpperCase()
-    : user?.email?.[0]?.toUpperCase() || "A";
-
+  isSidebarCollapsed,
+  setIsSidebarCollapsed,
+  isSheetOpen,
+  setIsSheetOpen,
+}: HeaderProps) {
   return (
-    <header className="admin-header">
-      <div className="admin-header-inner">
-        <div className="admin-header-left">
-          {/* Desktop collapse toggle */}
-          <button onClick={onToggle} className="admin-header-toggle desktop-only" title="Toggle Sidebar">
-            <div className="hamburger-lines">
-              <span className={`hamburger-line ${collapsed ? "collapsed-top" : ""}`}></span>
-              <span className={`hamburger-line hamburger-line-mid ${collapsed ? "collapsed-mid" : ""}`}></span>
-              <span className={`hamburger-line ${collapsed ? "collapsed-bottom" : ""}`}></span>
-            </div>
-          </button>
-
-          {/* Mobile menu button */}
-          <button onClick={onMenuClick} className="admin-header-toggle mobile-only" title="Open Menu">
-            <div className="hamburger-lines">
-              <span className="hamburger-line"></span>
-              <span className="hamburger-line hamburger-line-mid"></span>
-              <span className="hamburger-line"></span>
-            </div>
-          </button>
-        </div>
-
-        <div className="admin-header-right">
-          {/* Store link */}
-          <a href="/" className="admin-header-store-link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-              <polyline points="10,17 15,12 10,7" />
-              <line x1="15" x2="3" y1="12" y2="12" />
-            </svg>
-            <span className="desktop-only">Visit Store</span>
-          </a>
-
-          {/* Profile dropdown */}
-          <div className="admin-profile-dropdown" ref={dropdownRef}>
+    <header className="sm:pt-6 pt-3 sm:px-6 px-3 w-full sticky top-0 z-40">
+      <div className="bg-white/80 dark:bg-[#191B1F]/80 backdrop-blur-md w-full sm:px-6 px-4 rounded-xl border border-[#e2e8f0] dark:border-[#2e333d] shadow-sm transition-all duration-300">
+        <div className="flex justify-between items-center gap-5 h-[70px]">
+          {/* Left Side: Toggles */}
+          <div className="flex items-center gap-4">
+            {/* Desktop Toggle */}
             <button
-              onClick={() => setProfileOpen(!profileOpen)}
-              className="admin-profile-trigger"
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className="xl:flex hidden cursor-pointer items-center justify-center size-10 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all duration-200"
+              aria-label="Toggle Sidebar"
             >
-              <div className="admin-avatar">{initials}</div>
-              <div className="admin-profile-info desktop-only">
-                <span className="admin-profile-name">
-                  {user?.firstName || "Admin"}
-                </span>
-                <span className="admin-profile-role">Administrator</span>
+              <div className="flex flex-col justify-between w-5 h-4 transform transition-all duration-300 origin-center overflow-hidden rotate-180">
+                <div className={cn("bg-slate-800 dark:bg-slate-200 h-0.5 transform transition-all duration-300 origin-left delay-75", isSidebarCollapsed && "rotate-[42deg] w-[11px]")}></div>
+                <div className={cn("bg-slate-800 dark:bg-slate-200 h-0.5 w-5 rounded transform transition-all duration-300", isSidebarCollapsed && "opacity-0 translate-x-3")}></div>
+                <div className={cn("bg-slate-800 dark:bg-slate-200 h-0.5 transform transition-all duration-300 origin-left delay-75", isSidebarCollapsed && "-rotate-[42deg] w-[11px]")}></div>
               </div>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`admin-chevron ${profileOpen ? "rotated" : ""} desktop-only`}>
-                <path d="m6 9 6 6 6-6" />
-              </svg>
             </button>
 
-            {profileOpen && (
-              <div className="admin-profile-menu">
-                <div className="admin-profile-menu-header">
-                  <p className="admin-profile-menu-name">
-                    {user?.firstName} {user?.lastName}
-                  </p>
-                  <p className="admin-profile-menu-email">{user?.email}</p>
-                </div>
-                <div className="admin-profile-menu-divider" />
-                <button onClick={handleLogout} className="admin-profile-menu-item danger">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                    <polyline points="16,17 21,12 16,7" />
-                    <line x1="21" x2="9" y1="12" y2="12" />
-                  </svg>
-                  Sign Out
-                </button>
+            {/* Mobile Toggle */}
+            <button
+              onClick={() => setIsSheetOpen(true)}
+              className="xl:hidden flex items-center justify-center size-10 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all duration-200"
+              aria-label="Open Menu"
+            >
+              <div className="flex flex-col justify-between w-5 h-3.5 transform transition-all duration-300 origin-center overflow-hidden rotate-180">
+                <div className={cn("bg-slate-800 dark:bg-slate-200 h-0.5 transform transition-all duration-300 origin-left", isSheetOpen && "rotate-[42deg] w-[11px]")}></div>
+                <div className={cn("bg-slate-800 dark:bg-slate-200 h-0.5 w-5 rounded transform transition-all duration-300", isSheetOpen && "opacity-0 translate-x-3")}></div>
+                <div className={cn("bg-slate-800 dark:bg-slate-200 h-0.5 transform transition-all duration-300 origin-left", isSheetOpen && "-rotate-[42deg] w-[11px]")}></div>
               </div>
-            )}
+            </button>
+
+            {/* Search (Optional, matching reference aesthetics) */}
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-[#2e333d] text-slate-400 focus-within:ring-2 focus-within:ring-blue-600/20 focus-within:border-blue-600/20 transition-all group">
+              <Search className="size-4 group-focus-within:text-blue-600" />
+              <input
+                type="text"
+                placeholder="Search anything..."
+                className="bg-transparent border-none outline-none text-sm text-slate-800 dark:text-slate-200 w-48 placeholder:text-slate-400"
+              />
+              <span className="text-[10px] font-bold bg-white dark:bg-white/5 border border-slate-200 dark:border-white/5 px-1.5 py-0.5 rounded shadow-sm">
+                ⌘K
+              </span>
+            </div>
+          </div>
+
+          {/* Right Side: Actions */}
+          <div className="flex items-center gap-2 sm:gap-4 h-full">
+            {/* View Store */}
+            <Link
+              href="/"
+              className="hidden sm:flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            >
+              <span>Store</span>
+              <ExternalLink className="size-4" />
+            </Link>
+
+            <div className="h-6 w-px bg-slate-200 dark:bg-white/5 hidden sm:block mx-1" />
+
+            <div className="flex items-center gap-1">
+              <button className="hidden sm:flex items-center justify-center size-9 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 text-slate-500 dark:text-slate-400 transition-all">
+                <Maximize className="size-4.5" />
+              </button>
+              <button className="flex items-center justify-center size-9 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 text-slate-500 dark:text-slate-400 transition-all">
+                <Sun className="size-4.5" />
+              </button>
+              <NotificationDropdown />
+            </div>
+
+            <div className="h-6 w-px bg-slate-200 dark:bg-white/5 hidden sm:block mx-1" />
+
+            {/* Profile Dropdown */}
+            <ProfileDropdown />
           </div>
         </div>
       </div>

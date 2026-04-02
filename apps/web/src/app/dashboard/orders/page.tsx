@@ -3,6 +3,35 @@
 import { useEffect, useState } from "react";
 import { adminOrderAPI } from "@/lib/adminServices";
 import { Order } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { LoadingSpinner } from "@/components/admin/LoadingSpinner";
+import { RotateCw, ShoppingCart } from "lucide-react";
+import { SearchBar } from "@/components/admin/SearchBar";
+import { EmptyState } from "@/components/admin/EmptyState";
+import { Pagination } from "@/components/admin/Pagination";
 
 const ORDER_STATUSES = [
   "PENDING",
@@ -16,9 +45,12 @@ const ORDER_STATUSES = [
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     loadOrders();
@@ -36,12 +68,19 @@ export default function OrdersPage() {
     }
   };
 
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    setPage(1);
+  };
+
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
       setUpdatingId(orderId);
       await adminOrderAPI.updateStatus(orderId, newStatus);
       setOrders((prev) =>
-        prev.map((o) => (o.id === orderId ? { ...o, status: newStatus as any } : o))
+        prev.map((o) =>
+          o.id === orderId ? { ...o, status: newStatus as any } : o
+        )
       );
     } catch (err) {
       console.error("Failed to update order status:", err);
@@ -50,157 +89,206 @@ export default function OrdersPage() {
     }
   };
 
-  const statusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      PENDING: "badge-warning",
-      PROCESSING: "badge-info",
-      SHIPPED: "badge-primary",
-      DELIVERED: "badge-success",
-      CANCELLED: "badge-danger",
-      REFUNDED: "badge-secondary",
-    };
-    return colors[status] || "badge-secondary";
+  const getBadgeVariant = (status: string) => {
+    switch (status) {
+      case "DELIVERED":
+        return "bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 border-none";
+      case "PROCESSING":
+        return "bg-blue-100 text-blue-800 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 border-none";
+      case "SHIPPED":
+        return "bg-indigo-100 text-indigo-800 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 border-none";
+      case "PENDING":
+        return "bg-amber-100 text-amber-800 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 border-none";
+      case "CANCELLED":
+        return "bg-red-100 text-red-800 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 border-none";
+      case "REFUNDED":
+        return "bg-slate-100 text-slate-800 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-400 border-none";
+      default:
+        return "bg-secondary";
+    }
   };
 
   const filtered = orders.filter((o: any) => {
     const matchesSearch =
-      o.orderNumber?.toLowerCase().includes(search.toLowerCase()) ||
-      o.user?.email?.toLowerCase().includes(search.toLowerCase()) ||
-      o.user?.firstName?.toLowerCase().includes(search.toLowerCase());
+      o.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      o.user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      o.user?.firstName?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "ALL" || o.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+
+  const paginatedOrders = filtered.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
+
   if (loading) {
-    return (
-      <div className="admin-page-loading">
-        <div className="admin-loading-spinner" />
-        <p>Loading orders...</p>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
-    <div className="dashboard-page">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Orders</h1>
-          <p className="page-subtitle">Manage customer orders</p>
-        </div>
-        <button onClick={loadOrders} className="btn btn-outline btn-icon" title="Refresh">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-            <path d="M3 3v5h5" />
-            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
-            <path d="M16 16h5v5" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Filters */}
-      <div className="filters-bar">
-        <div className="search-bar">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="search-icon">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Search by order #, email, name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="search-input"
-          />
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className="text-accent font-bold md:text-2xl text-xl">Orders</h2>
+          <p className="text-accent-foreground md:text-base text-sm">
+            Manage customer orders
+          </p>
         </div>
 
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="filter-select"
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => loadOrders()}
+          className="bg-white dark:bg-[#27292D] size-11 hover:bg-card active:scale-95 transition-all cursor-pointer shrink-0"
+          title="Refresh"
         >
-          <option value="ALL">All Statuses</option>
-          {ORDER_STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+          <RotateCw className="h-4 w-4" />
+        </Button>
       </div>
 
-      {/* Orders Table */}
-      <div className="card">
-        <div className="table-container">
+      <Card className="border card-border shadow-lg shadow-[#2E2D740D] rounded-[10px] overflow-hidden bg-card mt-8">
+        <div className="bg-card-header sm:px-6 px-4 py-3 flex sm:items-center justify-between gap-4 md:flex-nowrap flex-wrap border-b card-border">
+          <SearchBar
+            placeholder="Search by order #, email, name..."
+            value={searchTerm}
+            onChange={handleSearch}
+          />
+
+          <div className="sm:w-40 w-full">
+            <Select
+              value={statusFilter}
+              onValueChange={(value) => {
+                setStatusFilter(value);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="border-default bg-white dark:bg-[#141414] w-full">
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Statuses</SelectItem>
+                {ORDER_STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <CardContent className="p-0">
           {filtered.length === 0 ? (
-            <div className="empty-state">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="empty-state-icon">
-                <circle cx="8" cy="21" r="1" />
-                <circle cx="19" cy="21" r="1" />
-                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-              </svg>
-              <p>{search || statusFilter !== "ALL" ? "No orders match your filters" : "No orders yet"}</p>
-            </div>
+            <EmptyState
+              icon={ShoppingCart}
+              title={
+                searchTerm || statusFilter !== "ALL"
+                  ? "No orders match your filters"
+                  : "No orders yet"
+              }
+              description={
+                searchTerm || statusFilter !== "ALL"
+                  ? "There are no orders matching your current search or status filter."
+                  : "You haven't received any orders yet."
+              }
+            />
           ) : (
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Order #</th>
-                  <th>Customer</th>
-                  <th>Items</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                  <th>Payment</th>
-                  <th>Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((order: any) => (
-                  <tr key={order.id}>
-                    <td className="font-semibold">{order.orderNumber}</td>
-                    <td>
-                      <div>
-                        <p className="customer-name">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent border-default bg-muted/50">
+                  <TableHead>Order #</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Items</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Payment</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedOrders.map((order: any) => (
+                  <TableRow key={order.id} className="border-default">
+                    <TableCell className="font-semibold text-sm">
+                      {order.orderNumber}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-foreground">
                           {order.user?.firstName
                             ? `${order.user.firstName} ${order.user.lastName || ""}`
                             : "—"}
-                        </p>
-                        <p className="customer-email">{order.user?.email}</p>
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {order.user?.email || "No email"}
+                        </span>
                       </div>
-                    </td>
-                    <td>{order.items?.length || 0} items</td>
-                    <td className="font-semibold">${Number(order.totalAmount).toFixed(2)}</td>
-                    <td>
-                      <span className={`badge ${statusColor(order.status)}`}>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {order.items?.length || 0} items
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      ${Number(order.totalAmount).toFixed(2)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getBadgeVariant(order.status)}>
                         {order.status}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`badge ${statusColor(order.paymentStatus)}`}>
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getBadgeVariant(order.paymentStatus)}>
                         {order.paymentStatus}
-                      </span>
-                    </td>
-                    <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                    <td>
-                      <select
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Select
                         value={order.status}
-                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                        onValueChange={(value) =>
+                          handleStatusChange(order.id, value)
+                        }
                         disabled={updatingId === order.id}
-                        className="status-select"
                       >
-                        {ORDER_STATUSES.map((s) => (
-                          <option key={s} value={s}>
-                            {s}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                  </tr>
+                        <SelectTrigger className="h-8 w-[130px] ml-auto border-default">
+                          <SelectValue placeholder="Update status" />
+                        </SelectTrigger>
+                        <SelectContent align="end">
+                          {ORDER_STATUSES.map((s) => (
+                            <SelectItem key={s} value={s}>
+                              {s}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           )}
-        </div>
-      </div>
+
+          {filtered.length > 0 && (
+            <div className="sm:px-6 px-4 py-3 border-t border-default">
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={(newPage) => setPage(newPage)}
+                pageSize={pageSize}
+                onPageSizeChange={(newPageSize) => {
+                  setPageSize(newPageSize);
+                  setPage(1);
+                }}
+                totalItems={filtered.length}
+              />
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

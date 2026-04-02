@@ -3,12 +3,44 @@
 import { useEffect, useState } from "react";
 import { adminUserAPI } from "@/lib/adminServices";
 import { User } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { LoadingSpinner } from "@/components/admin/LoadingSpinner";
+import { RotateCw, Users, CheckCircle2, XCircle } from "lucide-react";
+import { SearchBar } from "@/components/admin/SearchBar";
+import { EmptyState } from "@/components/admin/EmptyState";
+import { Pagination } from "@/components/admin/Pagination";
 
 export default function CustomersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
+  
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     loadUsers();
@@ -26,147 +58,164 @@ export default function CustomersPage() {
     }
   };
 
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    setPage(1);
+  };
+
   const filtered = users.filter((u) => {
     const matchesSearch =
-      u.email.toLowerCase().includes(search.toLowerCase()) ||
-      (u.firstName && u.firstName.toLowerCase().includes(search.toLowerCase())) ||
-      (u.lastName && u.lastName.toLowerCase().includes(search.toLowerCase()));
+      u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (u.firstName && u.firstName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (u.lastName && u.lastName.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesRole = roleFilter === "ALL" || u.role === roleFilter;
     return matchesSearch && matchesRole;
   });
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  
+  const paginatedUsers = filtered.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
+
   if (loading) {
-    return (
-      <div className="admin-page-loading">
-        <div className="admin-loading-spinner" />
-        <p>Loading customers...</p>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
-    <div className="dashboard-page">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Customers</h1>
-          <p className="page-subtitle">View and manage all users</p>
-        </div>
-        <button onClick={loadUsers} className="btn btn-outline btn-icon" title="Refresh">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-            <path d="M3 3v5h5" />
-            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
-            <path d="M16 16h5v5" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Filters */}
-      <div className="filters-bar">
-        <div className="search-bar">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="search-icon">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="search-input"
-          />
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className="text-accent font-bold md:text-2xl text-xl">Customers</h2>
+          <p className="text-accent-foreground md:text-base text-sm">
+            View and manage all users
+          </p>
         </div>
 
-        <select
-          value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value)}
-          className="filter-select"
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => loadUsers()}
+          className="bg-white dark:bg-[#27292D] size-11 hover:bg-card active:scale-95 transition-all cursor-pointer shrink-0"
+          title="Refresh"
         >
-          <option value="ALL">All Roles</option>
-          <option value="CUSTOMER">Customers</option>
-          <option value="ADMIN">Admins</option>
-        </select>
+          <RotateCw className="h-4 w-4" />
+        </Button>
       </div>
 
-      {/* Users Table */}
-      <div className="card">
-        <div className="table-container">
+      <Card className="border card-border shadow-lg shadow-[#2E2D740D] rounded-[10px] overflow-hidden bg-card mt-8">
+        <div className="bg-card-header sm:px-6 px-4 py-3 flex sm:items-center justify-between gap-4 md:flex-nowrap flex-wrap border-b card-border">
+          <SearchBar
+            placeholder="Search by name or email..."
+            value={searchTerm}
+            onChange={handleSearch}
+          />
+
+          <div className="sm:w-40 w-full">
+            <Select
+              value={roleFilter}
+              onValueChange={(value) => {
+                setRoleFilter(value);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="border-default bg-white dark:bg-[#141414] w-full">
+                <SelectValue placeholder="All Roles" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Roles</SelectItem>
+                <SelectItem value="CUSTOMER">Customers</SelectItem>
+                <SelectItem value="ADMIN">Admins</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <CardContent className="p-0">
           {filtered.length === 0 ? (
-            <div className="empty-state">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="empty-state-icon">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-              <p>{search || roleFilter !== "ALL" ? "No users match your filters" : "No users yet"}</p>
-            </div>
+            <EmptyState
+              icon={Users}
+              title={searchTerm || roleFilter !== "ALL" ? "No users match your filters" : "No users yet"}
+              description={searchTerm || roleFilter !== "ALL" ? "There are no users matching your current search or role filter." : "There are currently no users registered in the system."}
+            />
           ) : (
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th>Verified</th>
-                  <th>Joined</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((user) => (
-                  <tr key={user.id}>
-                    <td>
-                      <div className="user-cell">
-                        <div className="user-avatar">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent border-default bg-muted/50">
+                  <TableHead>User</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-center">Verified</TableHead>
+                  <TableHead className="text-right">Joined</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedUsers.map((user) => (
+                  <TableRow key={user.id} className="border-default">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-medium border border-primary/20">
                           {user.firstName
                             ? user.firstName[0].toUpperCase()
                             : user.email[0].toUpperCase()}
                         </div>
-                        <span className="user-name">
-                          {user.firstName
-                            ? `${user.firstName} ${user.lastName || ""}`
-                            : "—"}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className="font-medium text-foreground">
+                            {user.firstName
+                              ? `${user.firstName} ${user.lastName || ""}`
+                              : "—"}
+                          </span>
+                        </div>
                       </div>
-                    </td>
-                    <td>{user.email}</td>
-                    <td>
-                      <span className={`badge ${user.role === "ADMIN" ? "badge-primary" : "badge-secondary"}`}>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                    <TableCell>
+                      <Badge variant={user.role === "ADMIN" ? "default" : "secondary"} className={user.role === "ADMIN" ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}>
                         {user.role}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`badge ${user.isActive ? "badge-success" : "badge-danger"}`}>
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={user.isActive ? "border-green-500 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10" : "border-red-500 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10"}>
                         {user.isActive ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                    <td>
-                      {user.emailVerified ? (
-                        <span className="text-success">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                            <path d="m9 11 3 3L22 4" />
-                          </svg>
-                        </span>
-                      ) : (
-                        <span className="text-muted">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="10" />
-                            <path d="m15 9-6 6" />
-                            <path d="m9 9 6 6" />
-                          </svg>
-                        </span>
-                      )}
-                    </td>
-                    <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-                  </tr>
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex justify-center">
+                        {user.emailVerified ? (
+                          <CheckCircle2 className="h-5 w-5 text-green-500" />
+                        ) : (
+                          <XCircle className="h-5 w-5 text-muted-foreground/40" />
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right text-muted-foreground">
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           )}
-        </div>
-      </div>
+
+          {filtered.length > 0 && (
+            <div className="sm:px-6 px-4 py-3 border-t border-default">
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={(newPage) => setPage(newPage)}
+                pageSize={pageSize}
+                onPageSizeChange={(newPageSize) => {
+                  setPageSize(newPageSize);
+                  setPage(1);
+                }}
+                totalItems={filtered.length}
+              />
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -22,6 +22,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { LoadingSpinner } from "@/components/admin/LoadingSpinner";
 import { Plus, Trash, Edit, PackageSearch } from "lucide-react";
 import { SearchBar } from "@/components/admin/SearchBar";
@@ -34,6 +41,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -68,15 +76,21 @@ export default function ProductsPage() {
     }
   };
 
-  const filtered = products.filter(
-    (p) =>
+  const filtered = products.filter((p) => {
+    const matchesSearch =
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (p.description &&
-        p.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+        p.description.toLowerCase().includes(searchTerm.toLowerCase()));
+        
+    let matchesStatus = true;
+    if (statusFilter === "ACTIVE") matchesStatus = p.isActive === true;
+    if (statusFilter === "INACTIVE") matchesStatus = p.isActive === false;
+
+    return matchesSearch && matchesStatus;
+  });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  
+
   const paginatedProducts = filtered.slice(
     (page - 1) * pageSize,
     page * pageSize
@@ -110,27 +124,42 @@ export default function ProductsPage() {
       </div>
 
       <Card className="border card-border shadow-lg shadow-[#2E2D740D] rounded-[10px] overflow-hidden bg-card mt-8">
-        <CardHeader className="flex flex-row flex-wrap gap-4 items-center justify-between bg-[#FAFAFB] dark:bg-[#191B1F] sm:px-6 px-4 py-4 border-b border-default">
-          <div className="space-y-1">
-            <CardTitle className="text-xl font-bold">Product Catalog</CardTitle>
-            <CardDescription className="text-sm">
-              {filtered.length} products total
-            </CardDescription>
-          </div>
-
+        <div className="bg-card-header sm:px-6 px-4 py-3 flex sm:items-center justify-between gap-4 sm:flex-nowrap flex-wrap border-b card-border">
           <SearchBar
             placeholder="Search products..."
             value={searchTerm}
             onChange={handleSearch}
           />
-        </CardHeader>
+          <div className="sm:w-40 w-full">
+            <Select
+              value={statusFilter}
+              onValueChange={(value) => {
+                setStatusFilter(value);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="border-default bg-white dark:bg-[#141414] w-full">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Status</SelectItem>
+                <SelectItem value="ACTIVE">Active</SelectItem>
+                <SelectItem value="INACTIVE">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
         <CardContent className="p-0">
           {filtered.length === 0 ? (
             <EmptyState
               icon={PackageSearch}
-              title={searchTerm ? "No products found" : "No products yet"}
-              description={searchTerm ? "There are no products matching your search" : "Your product catalog is currently empty."}
+              title={searchTerm || statusFilter !== "ALL" ? "No products found" : "No products yet"}
+              description={
+                searchTerm || statusFilter !== "ALL"
+                  ? "There are no products matching your filters"
+                  : "Your product catalog is currently empty."
+              }
               action={
                 !searchTerm ? (
                   <Button asChild variant="outline">
@@ -263,7 +292,7 @@ export default function ProductsPage() {
               </TableBody>
             </Table>
           )}
-          
+
           {filtered.length > 0 && (
             <div className="sm:px-6 px-4 py-3 border-t border-default">
               <Pagination

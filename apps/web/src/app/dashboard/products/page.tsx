@@ -4,16 +4,47 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { adminProductAPI } from "@/lib/adminServices";
 import { Product } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { LoadingSpinner } from "@/components/admin/LoadingSpinner";
+import { Plus, Trash, Edit, PackageSearch } from "lucide-react";
+import { SearchBar } from "@/components/admin/SearchBar";
+import { EmptyState } from "@/components/admin/EmptyState";
+import { Pagination } from "@/components/admin/Pagination";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     loadProducts();
   }, []);
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    setPage(1);
+  };
 
   const loadProducts = async () => {
     try {
@@ -39,173 +70,217 @@ export default function ProductsPage() {
 
   const filtered = products.filter(
     (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      (p.description && p.description.toLowerCase().includes(search.toLowerCase()))
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.description &&
+        p.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  
+  const paginatedProducts = filtered.slice(
+    (page - 1) * pageSize,
+    page * pageSize
   );
 
   if (loading) {
-    return (
-      <div className="admin-page-loading">
-        <div className="admin-loading-spinner" />
-        <p>Loading products...</p>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
-    <div className="dashboard-page">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Products</h1>
-          <p className="page-subtitle">Manage your product catalog</p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className="text-accent font-bold md:text-2xl text-xl">
+            Products
+          </h2>
+          <p className="text-accent-foreground md:text-base text-sm">
+            Manage your product catalog
+          </p>
         </div>
-        <Link href="/dashboard/products/new" className="btn btn-primary">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12h14" />
-            <path d="M12 5v14" />
-          </svg>
-          Add Product
-        </Link>
+
+        <Button
+          asChild
+          className="bg-primary hover:bg-primary/90 text-white active:scale-95 transition-all"
+        >
+          <Link href="/dashboard/products/new">
+            <Plus className="h-4 w-4" />
+            Add Product
+          </Link>
+        </Button>
       </div>
 
-      {/* Search */}
-      <div className="search-bar">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="search-icon">
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.3-4.3" />
-        </svg>
-        <input
-          type="text"
-          placeholder="Search products..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="search-input"
-        />
-      </div>
+      <Card className="border card-border shadow-lg shadow-[#2E2D740D] rounded-[10px] overflow-hidden bg-card mt-8">
+        <CardHeader className="flex flex-row flex-wrap gap-4 items-center justify-between bg-[#FAFAFB] dark:bg-[#191B1F] sm:px-6 px-4 py-4 border-b border-default">
+          <div className="space-y-1">
+            <CardTitle className="text-xl font-bold">Product Catalog</CardTitle>
+            <CardDescription className="text-sm">
+              {filtered.length} products total
+            </CardDescription>
+          </div>
 
-      {/* Products Table */}
-      <div className="card">
-        <div className="table-container">
+          <SearchBar
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={handleSearch}
+          />
+        </CardHeader>
+
+        <CardContent className="p-0">
           {filtered.length === 0 ? (
-            <div className="empty-state">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="empty-state-icon">
-                <path d="m7.5 4.27 9 5.15" />
-                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-                <path d="m3.3 7 8.7 5 8.7-5" />
-                <path d="M12 22V12" />
-              </svg>
-              <p>{search ? "No products match your search" : "No products yet"}</p>
-              {!search && (
-                <Link href="/dashboard/products/new" className="btn btn-primary btn-sm" style={{ marginTop: "1rem" }}>
-                  Add Your First Product
-                </Link>
-              )}
-            </div>
+            <EmptyState
+              icon={PackageSearch}
+              title={searchTerm ? "No products found" : "No products yet"}
+              description={searchTerm ? "There are no products matching your search" : "Your product catalog is currently empty."}
+              action={
+                !searchTerm ? (
+                  <Button asChild variant="outline">
+                    <Link href="/dashboard/products/new">
+                      Add Your First Product
+                    </Link>
+                  </Button>
+                ) : undefined
+              }
+            />
           ) : (
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Price</th>
-                  <th>Stock</th>
-                  <th>Status</th>
-                  <th>Created</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((product) => (
-                  <tr key={product.id}>
-                    <td>
-                      <div className="product-cell">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent border-default bg-muted/50">
+                  <TableHead className="w-[300px]">Product</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Stock</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedProducts.map((product) => (
+                  <TableRow key={product.id} className="border-default">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
                         {product.image ? (
-                          <img
-                            src={product.image}
-                            alt={product.name}
-                            className="product-thumb"
-                          />
+                          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md border border-default">
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
                         ) : (
-                          <div className="product-thumb-placeholder">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                              <circle cx="9" cy="9" r="2" />
-                              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                            </svg>
+                          <div className="h-10 w-10 shrink-0 flex items-center justify-center rounded-md border border-default bg-muted text-muted-foreground">
+                            <PackageSearch className="h-5 w-5" />
                           </div>
                         )}
-                        <div>
-                          <p className="product-name">{product.name}</p>
+                        <div className="flex flex-col">
+                          <span className="font-medium text-foreground">
+                            {product.name}
+                          </span>
                           {product.description && (
-                            <p className="product-desc">
-                              {product.description.length > 60
-                                ? product.description.substring(0, 60) + "..."
-                                : product.description}
-                            </p>
+                            <span className="text-xs text-muted-foreground line-clamp-1 max-w-[200px]">
+                              {product.description}
+                            </span>
                           )}
                         </div>
                       </div>
-                    </td>
-                    <td className="font-semibold">${Number(product.price).toFixed(2)}</td>
-                    <td>
-                      <span className={product.stock <= 0 ? "text-danger" : product.stock <= 5 ? "text-warning" : ""}>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      ${Number(product.price).toFixed(2)}
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={
+                          product.stock <= 0
+                            ? "text-destructive font-medium"
+                            : product.stock <= 5
+                              ? "text-amber-500 font-medium"
+                              : ""
+                        }
+                      >
                         {product.stock}
                       </span>
-                    </td>
-                    <td>
-                      <span className={`badge ${product.isActive ? "badge-success" : "badge-danger"}`}>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={product.isActive ? "default" : "secondary"}
+                        className={
+                          product.isActive
+                            ? "bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400"
+                            : ""
+                        }
+                      >
                         {product.isActive ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                    <td>{new Date(product.createdAt).toLocaleDateString()}</td>
-                    <td>
-                      <div className="action-buttons">
-                        <Link
-                          href={`/dashboard/products/${product.id}/edit`}
-                          className="btn btn-outline btn-sm btn-icon"
-                          title="Edit"
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {new Date(product.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          asChild
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8 hover:bg-slate-50 dark:hover:bg-slate-800"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                            <path d="m15 5 4 4" />
-                          </svg>
-                        </Link>
+                          <Link href={`/dashboard/products/${product.id}/edit`}>
+                            <Edit className="h-4 w-4" />
+                          </Link>
+                        </Button>
+
                         {deleteConfirm === product.id ? (
-                          <div className="confirm-delete">
-                            <button
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="h-8 shadow-sm"
                               onClick={() => handleDelete(product.id)}
-                              className="btn btn-danger btn-sm"
                             >
                               Confirm
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 shadow-sm"
                               onClick={() => setDeleteConfirm(null)}
-                              className="btn btn-outline btn-sm"
                             >
                               Cancel
-                            </button>
+                            </Button>
                           </div>
                         ) : (
-                          <button
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
                             onClick={() => setDeleteConfirm(product.id)}
-                            className="btn btn-outline btn-sm btn-icon btn-danger-outline"
-                            title="Delete"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M3 6h18" />
-                              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                            </svg>
-                          </button>
+                            <Trash className="h-4 w-4" />
+                          </Button>
                         )}
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           )}
-        </div>
-      </div>
+          
+          {filtered.length > 0 && (
+            <div className="sm:px-6 px-4 py-3 border-t border-default">
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={(newPage) => setPage(newPage)}
+                pageSize={pageSize}
+                onPageSizeChange={(newPageSize) => {
+                  setPageSize(newPageSize);
+                  setPage(1);
+                }}
+                totalItems={filtered.length}
+              />
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

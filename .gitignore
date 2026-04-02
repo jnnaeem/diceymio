@@ -1,5 +1,6 @@
 # Dependencies
 node_modules
+dot_bd_reseller
 /.pnp
 .pnp.js
 yarn.lock

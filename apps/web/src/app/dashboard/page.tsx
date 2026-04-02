@@ -4,6 +4,24 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { adminUserAPI, adminOrderAPI } from "@/lib/adminServices";
 import { Order } from "@/types";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { StatusBadge } from "@/components/dashboard/shared/StatusBadge";
+import { ShoppingCart, RotateCw, ArrowRight } from "lucide-react";
 
 type Stats = {
   totalProducts: number;
@@ -36,17 +54,7 @@ export default function DashboardPage() {
     }
   };
 
-  const statusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      PENDING: "badge-warning",
-      PROCESSING: "badge-info",
-      SHIPPED: "badge-primary",
-      DELIVERED: "badge-success",
-      CANCELLED: "badge-danger",
-      REFUNDED: "badge-secondary",
-    };
-    return colors[status] || "badge-secondary";
-  };
+
 
   if (loading) {
     return (
@@ -138,64 +146,67 @@ export default function DashboardPage() {
       )}
 
       {/* Recent Orders Table */}
-      <div className="card">
-        <div className="card-header">
-          <div>
-            <h2 className="card-title">Recent Orders</h2>
-            <p className="card-subtitle">Latest 10 orders placed</p>
+      <Card className="border card-border shadow-lg shadow-[#2E2D740D] rounded-[10px] overflow-hidden bg-card mt-8">
+        <CardHeader className="flex flex-row items-center justify-between bg-[#FAFAFB] dark:bg-[#191B1F] sm:px-6 px-4 py-4 border-b border-default">
+          <div className="space-y-1">
+            <CardTitle className="text-xl font-bold">Recent Orders</CardTitle>
+            <CardDescription className="text-sm">Latest 10 orders placed</CardDescription>
           </div>
-          <Link href="/dashboard/orders" className="btn btn-outline btn-sm">
-            View All
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14" />
-              <path d="m12 5 7 7-7 7" />
-            </svg>
-          </Link>
-        </div>
-
-        <div className="table-container">
+          <Button asChild variant="outline" size="sm" className="hidden sm:flex h-9 shadow-sm hover:bg-slate-50">
+            <Link href="/dashboard/orders">
+              View All
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </CardHeader>
+        <CardContent className="p-0">
           {recentOrders.length === 0 ? (
-            <div className="empty-state">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="empty-state-icon">
-                <circle cx="8" cy="21" r="1" />
-                <circle cx="19" cy="21" r="1" />
-                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-              </svg>
+            <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
+              <ShoppingCart className="h-10 w-10 mb-4 opacity-50 text-slate-400" />
               <p>No orders yet</p>
             </div>
           ) : (
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Order #</th>
-                  <th>Customer</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Order #</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {recentOrders.map((order: any) => (
-                  <tr key={order.id}>
-                    <td className="font-semibold">{order.orderNumber}</td>
-                    <td>
+                  <TableRow key={order.id}>
+                    <TableCell className="font-semibold">{order.orderNumber}</TableCell>
+                    <TableCell>
                       {order.user?.firstName
                         ? `${order.user.firstName} ${order.user.lastName || ""}`
                         : order.user?.email || order.userId}
-                    </td>
-                    <td>${Number(order.totalAmount).toFixed(2)}</td>
-                    <td>
-                      <span className={`badge ${statusColor(order.status)}`}>
-                        {order.status}
-                      </span>
-                    </td>
-                    <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                  </tr>
+                    </TableCell>
+                    <TableCell className="font-medium">${Number(order.totalAmount).toFixed(2)}</TableCell>
+                    <TableCell>
+                      <StatusBadge status={order.status} />
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           )}
-        </div>
+        </CardContent>
+      </Card>
+      
+      {/* Mobile view all link */}
+      <div className="sm:hidden mt-4 text-center">
+        <Button asChild variant="outline" className="w-full">
+          <Link href="/dashboard/orders">
+            View All Orders
+          </Link>
+        </Button>
       </div>
     </div>
   );

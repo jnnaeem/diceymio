@@ -3,10 +3,16 @@ import { sendSuccess } from "../../utils/response";
 import { BadRequestError } from "../../utils/errors";
 import { createProductSchema, updateProductSchema } from "./admin-product.validation";
 import {
+  listAllProductsAdmin,
   createProduct,
   updateProduct,
   deleteProduct,
 } from "./admin-product.service";
+
+export const listAllProductsController = asyncHandler(async (req, res) => {
+  const products = await listAllProductsAdmin();
+  sendSuccess(res, 200, products, "Products retrieved successfully");
+});
 
 export const createProductController = asyncHandler(async (req, res) => {
   const result = createProductSchema.safeParse(req.body);

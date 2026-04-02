@@ -34,7 +34,7 @@ export default function Home() {
                     <span className="absolute -top-1 -right-2 w-2 h-2 bg-blue-600 rounded-full scale-0 group-hover:scale-100 transition-transform"></span>
                   </Link>
                   {user.role === "ADMIN" && (
-                    <Link href="/admin" className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 transition-colors">Admin Panel</Link>
+                    <Link href="/dashboard" className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 transition-colors">Dashboard</Link>
                   )}
                   <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200">
                     {user.firstName?.[0] || user.email[0].toUpperCase()}

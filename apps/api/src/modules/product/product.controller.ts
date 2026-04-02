@@ -8,6 +8,6 @@ export const listProductsController = asyncHandler(async (req, res) => {
 });
 
 export const getProductController = asyncHandler(async (req, res) => {
-  const product = await getProduct(req.params.id);
+  const product = await getProduct(req.params.id as string);
   sendSuccess(res, 200, product, "Product retrieved successfully");
 });

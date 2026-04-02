@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import jwt, { Secret, SignOptions } from "jsonwebtoken";
 import { JWTPayload } from "../types";
 
 const JWT_SECRET = process.env.JWT_SECRET || "super-secret-key";
@@ -11,8 +11,8 @@ export const generateToken = (
 ): string => {
   return jwt.sign(
     { userId, email, role },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRY }
+    JWT_SECRET as Secret,
+    { expiresIn: JWT_EXPIRY } as SignOptions
   );
 };
 

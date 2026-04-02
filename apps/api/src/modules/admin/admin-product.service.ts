@@ -2,6 +2,12 @@ import prisma from "../../config/database";
 import { NotFoundError } from "../../utils/errors";
 import { CreateProductInput, UpdateProductInput } from "./admin-product.validation";
 
+export const listAllProductsAdmin = async () => {
+  return prisma.product.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+};
+
 export const createProduct = async (input: CreateProductInput) => {
   return prisma.product.create({
     data: {

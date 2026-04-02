@@ -21,7 +21,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { StatusBadge } from "@/components/dashboard/shared/StatusBadge";
-import { ShoppingCart, ArrowRight, TrendingUp, Globe, Users, Wallet, RotateCw,} from "lucide-react";
+import {
+  ShoppingCart,
+  ArrowRight,
+  TrendingUp,
+  Globe,
+  Users,
+  Wallet,
+  RotateCw,
+} from "lucide-react";
 import { StatsCard } from "@/components/admin/StatsCard";
 import { LoadingSpinner } from "@/components/admin/LoadingSpinner";
 
@@ -64,7 +72,9 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="space-y-1">
-          <h2 className="text-accent font-bold md:text-2xl text-xl">Dashboard</h2>
+          <h2 className="text-accent font-bold md:text-2xl text-xl">
+            Dashboard
+          </h2>
           <p className="text-accent-foreground md:text-base text-sm">
             Overview of your business performance
           </p>
@@ -119,9 +129,16 @@ export default function DashboardPage() {
         <CardHeader className="flex flex-row flex-wrap gap-2 items-center justify-between bg-[#FAFAFB] dark:bg-[#191B1F] sm:px-6 px-4 py-4 border-b border-default">
           <div className="space-y-1">
             <CardTitle className="text-xl font-bold">Recent Orders</CardTitle>
-            <CardDescription className="text-sm">Latest 10 orders placed</CardDescription>
+            <CardDescription className="text-sm">
+              Latest 10 orders placed
+            </CardDescription>
           </div>
-          <Button asChild variant="outline" size="sm" className="flex h-9 shadow-sm hover:bg-slate-50">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="flex h-9 shadow-sm hover:bg-slate-50 dark:hover:bg-black"
+          >
             <Link href="/dashboard/orders">
               View All
               <ArrowRight className="h-4 w-4" />
@@ -148,13 +165,17 @@ export default function DashboardPage() {
               <TableBody>
                 {recentOrders.map((order: any) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-semibold">{order.orderNumber}</TableCell>
+                    <TableCell className="font-semibold">
+                      {order.orderNumber}
+                    </TableCell>
                     <TableCell>
                       {order.user?.firstName
                         ? `${order.user.firstName} ${order.user.lastName || ""}`
                         : order.user?.email || order.userId}
                     </TableCell>
-                    <TableCell className="font-medium">${Number(order.totalAmount).toFixed(2)}</TableCell>
+                    <TableCell className="font-medium">
+                      ${Number(order.totalAmount).toFixed(2)}
+                    </TableCell>
                     <TableCell>
                       <StatusBadge status={order.status} />
                     </TableCell>

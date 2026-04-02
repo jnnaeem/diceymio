@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/store/authStore";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,8 +12,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
 import { LogOut, User } from "lucide-react";
+import { FaUserAstronaut } from "react-icons/fa";
+import { PiPower } from "react-icons/pi";
 
 export default function ProfileDropdown() {
   const { user, logout } = useAuthStore();
@@ -33,25 +33,28 @@ export default function ProfileDropdown() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <div className="size-10 flex items-center justify-center rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-semibold cursor-pointer">
-          {initials}
+      <DropdownMenuTrigger asChild className="cursor-pointer">
+        <div className="size-10 flex items-center justify-center border-2 border-default rounded-full">
+          <FaUserAstronaut />
         </div>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="w-56 p-2" align="end">
+      <DropdownMenuContent className="w-60 p-2" align="end">
         {/* User Info */}
         <DropdownMenuLabel className="flex gap-3 items-center p-3">
-          <div className="size-10 flex items-center justify-center rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-semibold">
-            {initials}
+          <div className="size-10 flex items-center justify-center border-2 border-default rounded-full shrink-0">
+            <FaUserAstronaut />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium text-[#1e293b] dark:text-[#e2e8f0] capitalize">
               {user?.firstName} {user?.lastName}
             </span>
-            <span className="text-xs text-muted-foreground truncate">
+            <Link
+              href={`mailto:${user?.email}`}
+              className="text-xs text-[#475569] dark:text-[#94a3b8] hover:text-primary dark:hover:text-primary"
+            >
               {user?.email}
-            </span>
+            </Link>
           </div>
         </DropdownMenuLabel>
 
@@ -59,22 +62,20 @@ export default function ProfileDropdown() {
 
         {/* Menu Items */}
         <DropdownMenuGroup>
-          <Link href="/profile">
-            <DropdownMenuItem className="cursor-pointer">
-              <User className="size-4 mr-2" />
+          <Link href="/profile" className="cursor-pointer">
+            <DropdownMenuItem className="flex items-center gap-2 text-sm font-medium text-[#475569] dark:text-[#94a3b8] capitalize px-3 py-1.5 hover:bg-[#e2e8f0]! dark:hover:bg-[#334155]! cursor-pointer">
+              <User />
               Profile
             </DropdownMenuItem>
           </Link>
         </DropdownMenuGroup>
 
-        <DropdownMenuSeparator />
-
         {/* Logout */}
         <DropdownMenuItem
           onClick={handleLogout}
-          className="cursor-pointer text-red-600 focus:text-red-600"
+          className="flex items-center gap-2 text-sm font-medium text-[#475569] dark:text-[#94a3b8] capitalize my-1 px-3 hover:bg-[#e2e8f0]! dark:hover:bg-[#334155]! cursor-pointer"
         >
-          <LogOut className="size-4 mr-2" />
+          <PiPower />
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -81,7 +81,7 @@ export default function ProductsPage() {
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (p.description &&
         p.description.toLowerCase().includes(searchTerm.toLowerCase()));
-        
+
     let matchesStatus = true;
     if (statusFilter === "ACTIVE") matchesStatus = p.isActive === true;
     if (statusFilter === "INACTIVE") matchesStatus = p.isActive === false;
@@ -213,7 +213,7 @@ export default function ProductsPage() {
                       </div>
                     </TableCell>
                     <TableCell className="font-medium">
-                      ${Number(product.price).toFixed(2)}
+                      ৳{Number(product.price).toFixed(2)}
                     </TableCell>
                     <TableCell>
                       <span

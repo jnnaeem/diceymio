@@ -166,7 +166,7 @@ export default function EditProductPage() {
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price (BDT) *</FormLabel>
+                    <FormLabel>Price (৳) *</FormLabel>
                     <FormControl>
                       <Input type="number" step="1" min={1} {...field} className="h-11" />
                     </FormControl>

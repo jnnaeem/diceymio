@@ -127,7 +127,7 @@ export default function NewProductPage() {
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price (BDT) *</FormLabel>
+                    <FormLabel>Price (৳) *</FormLabel>
                     <FormControl>
                       <Input type="number" step="1" {...field} placeholder="499" className="h-11" />
                     </FormControl>

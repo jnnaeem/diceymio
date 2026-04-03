@@ -7,6 +7,7 @@ import { useCartStore } from "@/store/cartStore";
 import { productAPI, cartAPI } from "@/lib/services";
 import { Product } from "@/types";
 import { useRouter } from "next/navigation";
+import { getProductImageUrl } from "@/lib/utils";
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -96,7 +97,7 @@ export default function ProductsPage() {
               {product.image && (
                 <div className="bg-gray-200 h-48 flex items-center justify-center">
                   <img
-                    src={product.image}
+                    src={getProductImageUrl(product.image)!}
                     alt={product.name}
                     className="w-full h-full object-cover"
                   />

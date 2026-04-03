@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { orderAPI } from "@/lib/services";
 import { Order } from "@/types";
+import { getProductImageUrl } from "@/lib/utils";
 
 export default function OrdersPage() {
   const router = useRouter();
@@ -110,12 +111,25 @@ export default function OrdersPage() {
                 <div className="border-t border-gray-200 pt-4">
                   <h4 className="font-semibold mb-2">Items:</h4>
                   <ul className="space-y-2">
-                    {order.items.map((item) => (
-                      <li key={item.id} className="text-sm text-gray-600">
-                        {item.product.name} x {item.quantity} = $
-                        {(item.price * item.quantity).toFixed(2)}
-                      </li>
-                    ))}
+                      {order.items.map((item) => (
+                        <li key={item.id} className="flex gap-4 items-center border-b border-gray-100 last:border-0 pb-4 last:pb-0">
+                          <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded border border-gray-200">
+                            <img
+                              src={getProductImageUrl(item.product.image)!}
+                              alt={item.product.name}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-900">
+                              {item.product.name} x {item.quantity}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              Price: ${(item.price * item.quantity).toFixed(2)}
+                            </p>
+                          </div>
+                        </li>
+                      ))}
                   </ul>
                 </div>
               </div>

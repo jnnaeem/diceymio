@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { cartAPI, orderAPI } from "@/lib/services";
 import { Cart } from "@/types";
+import { getProductImageUrl } from "@/lib/utils";
 
 export default function CartPage() {
   const router = useRouter();
@@ -113,8 +114,15 @@ export default function CartPage() {
               {cart.items.map((item) => (
                 <div
                   key={item.id}
-                  className="flex gap-4 border-b border-gray-200 pb-4 mb-4"
+                  className="flex gap-4 border-b border-gray-200 pb-4 mb-4 items-center"
                 >
+                  <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                    <img
+                      src={getProductImageUrl(item.product.image)!}
+                      alt={item.product.name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold">
                       {item.product.name}

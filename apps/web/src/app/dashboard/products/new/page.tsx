@@ -4,45 +4,62 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { adminProductAPI } from "@/lib/adminServices";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { ArrowLeft, Loader2, Image as ImageIcon } from "lucide-react";
+import { toast } from "sonner";
+
+const productSchema = z.object({
+  name: z.string().min(1, "Product name is required"),
+  description: z.string().optional(),
+  price: z.string().min(1, "Price is required").refine(val => !isNaN(parseFloat(val)) && parseFloat(val) > 0, "Price must be a positive number"),
+  stock: z.string().min(1, "Stock is required").refine(val => !isNaN(parseInt(val)) && parseInt(val) >= 0, "Stock must be 0 or greater"),
+  image: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+});
+
+type ProductFormData = z.infer<typeof productSchema>;
 
 export default function NewProductPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [form, setForm] = useState({
-    name: "",
-    description: "",
-    price: "",
-    stock: "",
-    image: "",
+
+  const form = useForm<ProductFormData>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      price: "",
+      stock: "0",
+      image: "",
+    },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: ProductFormData) => {
     setError("");
-
-    if (!form.name.trim()) {
-      setError("Product name is required");
-      return;
-    }
-
-    const price = parseFloat(form.price);
-    if (isNaN(price) || price <= 0) {
-      setError("Price must be a positive number");
-      return;
-    }
-
-    const stock = parseInt(form.stock) || 0;
-
     try {
       setLoading(true);
       await adminProductAPI.create({
-        name: form.name.trim(),
-        description: form.description.trim() || undefined,
-        price,
-        stock,
-        image: form.image.trim() || undefined,
+        name: data.name.trim(),
+        description: data.description?.trim() || undefined,
+        price: parseFloat(data.price),
+        stock: parseInt(data.stock || "0"),
+        image: data.image?.trim() || undefined,
       });
+      toast.success("Product created successfully");
       router.push("/dashboard/products");
     } catch (err: any) {
       setError(err?.response?.data?.message || "Failed to create product");
@@ -52,123 +69,147 @@ export default function NewProductPage() {
   };
 
   return (
-    <div className="dashboard-page">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Add New Product</h1>
-          <p className="page-subtitle">Add a new product to your catalog</p>
+    <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className="text-accent font-bold md:text-2xl text-xl">Add New Product</h2>
+          <p className="text-accent-foreground md:text-base text-sm">
+            Add a new product to your catalog
+          </p>
         </div>
-        <Link href="/dashboard/products" className="btn btn-outline">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m12 19-7-7 7-7" />
-            <path d="M19 12H5" />
-          </svg>
-          Back to Products
-        </Link>
+        <Button asChild variant="outline" className="bg-white dark:bg-[#27292D] hover:bg-card active:scale-95 transition-all">
+          <Link href="/dashboard/products" className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Products
+          </Link>
+        </Button>
       </div>
 
-      <div className="card">
-        <div className="card-body">
-          {error && (
-            <div className="alert alert-danger">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" x2="12" y1="8" y2="12" />
-                <line x1="12" x2="12.01" y1="16" y2="16" />
-              </svg>
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="product-form">
-            <div className="form-group">
-              <label htmlFor="product-name" className="form-label">Product Name *</label>
-              <input
-                id="product-name"
-                type="text"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="form-input"
-                placeholder="e.g. Catan Board Game"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="product-desc" className="form-label">Description</label>
-              <textarea
-                id="product-desc"
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                className="form-textarea"
-                placeholder="Brief description of the product..."
-                rows={4}
-              />
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="product-price" className="form-label">Price ($) *</label>
-                <input
-                  id="product-price"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={form.price}
-                  onChange={(e) => setForm({ ...form, price: e.target.value })}
-                  className="form-input"
-                  placeholder="29.99"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="product-stock" className="form-label">Stock</label>
-                <input
-                  id="product-stock"
-                  type="number"
-                  min="0"
-                  value={form.stock}
-                  onChange={(e) => setForm({ ...form, stock: e.target.value })}
-                  className="form-input"
-                  placeholder="100"
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="product-image" className="form-label">Image URL</label>
-              <input
-                id="product-image"
-                type="text"
-                value={form.image}
-                onChange={(e) => setForm({ ...form, image: e.target.value })}
-                className="form-input"
-                placeholder="https://example.com/image.jpg"
-              />
-              {form.image && (
-                <div className="image-preview">
-                  <img src={form.image} alt="Preview" onError={(e) => (e.currentTarget.style.display = "none")} />
-                </div>
+      <Card className="border card-border shadow-lg shadow-[#2E2D740D] rounded-[10px] overflow-hidden bg-card mt-8 sm:p-8 p-5">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Product Name *</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="e.g. Catan Board Game" className="h-11" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Brief description of the product..."
+                      className="resize-none"
+                      rows={4}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Price (BDT) *</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="1" {...field} placeholder="499" className="h-11" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="stock"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Stock</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} placeholder="100" className="h-11" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
-            <div className="form-actions">
-              <button type="submit" className="btn btn-primary" disabled={loading}>
+            <FormField
+              control={form.control}
+              name="image"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Image URL</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <span className="absolute left-3 top-3.5 text-muted-foreground">
+                        <ImageIcon className="h-4 w-4" />
+                      </span>
+                      <Input {...field} placeholder="https://example.com/image.jpg" className="pl-10 h-11" />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+
+                  {field.value && !form.formState.errors.image && (
+                    <div className="mt-4 border card-border rounded-lg p-2 max-w-[200px] bg-muted/20">
+                      <img
+                        src={field.value}
+                        alt="Preview"
+                        className="w-full h-auto rounded object-cover"
+                        onError={(e) => (e.currentTarget.style.display = "none")}
+                      />
+                    </div>
+                  )}
+                </FormItem>
+              )}
+            />
+
+            <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push("/dashboard/products")}
+                disabled={loading}
+                className="active:scale-95 transition-all cursor-pointer hover:bg-card"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="bg-primary text-white active:scale-95 transition-all cursor-pointer"
+              >
                 {loading ? (
                   <>
-                    <div className="btn-spinner" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Creating...
                   </>
                 ) : (
                   "Create Product"
                 )}
-              </button>
-              <Link href="/dashboard/products" className="btn btn-outline">
-                Cancel
-              </Link>
+              </Button>
             </div>
           </form>
-        </div>
-      </div>
+        </Form>
+      </Card>
     </div>
   );
 }
+

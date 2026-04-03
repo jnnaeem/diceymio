@@ -34,6 +34,7 @@ import { Plus, Trash, Edit, PackageSearch } from "lucide-react";
 import { SearchBar } from "@/components/admin/SearchBar";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { Pagination } from "@/components/admin/Pagination";
+import { getProductImageUrl } from "@/lib/utils";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -190,7 +191,7 @@ export default function ProductsPage() {
                         {product.image ? (
                           <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md border border-default">
                             <img
-                              src={product.image}
+                              src={getProductImageUrl(product.image)!}
                               alt={product.name}
                               className="h-full w-full object-cover"
                             />

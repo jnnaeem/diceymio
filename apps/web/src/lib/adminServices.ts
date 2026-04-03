@@ -35,6 +35,17 @@ export const adminProductAPI = {
   delete: async (id: string): Promise<void> => {
     await api.delete(`/admin/products/${id}`);
   },
+
+  uploadImage: async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("image", file);
+    const response = await api.post("/admin/products/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data.data.imageUrl;
+  },
 };
 
 export const adminOrderAPI = {

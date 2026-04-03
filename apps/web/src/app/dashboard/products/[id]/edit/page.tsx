@@ -22,13 +22,14 @@ import {
 } from "@/components/ui/form";
 import { ArrowLeft, Loader2, Image as ImageIcon } from "lucide-react";
 import { LoadingSpinner } from "@/components/admin/LoadingSpinner";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 const productSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   description: z.string().optional(),
   price: z.string().min(1, "Price is required").refine(val => !isNaN(parseFloat(val)) && parseFloat(val) > 0, "Price must be a positive number"),
   stock: z.string().min(1, "Stock is required").refine(val => !isNaN(parseInt(val)) && parseInt(val) >= 0, "Stock must be 0 or greater"),
-  image: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  image: z.string().optional().or(z.literal("")),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -195,27 +196,16 @@ export default function EditProductPage() {
               name="image"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Image URL</FormLabel>
+                  <FormLabel>Product Image</FormLabel>
                   <FormControl>
-                    <div className="relative">
-                      <span className="absolute left-3 top-3.5 text-muted-foreground">
-                        <ImageIcon className="h-4 w-4" />
-                      </span>
-                      <Input {...field} className="pl-10 h-11" />
-                    </div>
+                    <ImageUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                      onUpload={adminProductAPI.uploadImage}
+                      disabled={saving}
+                    />
                   </FormControl>
                   <FormMessage />
-
-                  {field.value && !form.formState.errors.image && (
-                    <div className="mt-4 border card-border rounded-lg p-2 max-w-[200px] bg-muted/20">
-                      <img
-                        src={field.value}
-                        alt="Preview"
-                        className="w-full h-auto rounded object-cover"
-                        onError={(e) => (e.currentTarget.style.display = "none")}
-                      />
-                    </div>
-                  )}
                 </FormItem>
               )}
             />

@@ -17,11 +17,27 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+import path from "path";
+import fs from "fs";
+
+// Ensure upload directory exists
+const uploadDir = path.join(process.cwd(), "uploads/products");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: false, // Allow cross-origin images
+}));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files
+const staticPath = path.join(process.cwd(), "uploads");
+console.log(`[Static] Serving files from: ${staticPath}`);
+app.use("/uploads", express.static(staticPath));
 
 // Request logging
 app.use((req, res, next) => {

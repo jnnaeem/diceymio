@@ -40,3 +40,12 @@ export const deleteProductController = asyncHandler(async (req, res) => {
   const product = await deleteProduct(req.params.id as string);
   sendSuccess(res, 200, product, "Product deleted successfully");
 });
+
+export const uploadProductImageController = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    throw new BadRequestError("No image file provided");
+  }
+
+  const imageUrl = `/uploads/products/${req.file.filename}`;
+  sendSuccess(res, 201, { imageUrl }, "Image uploaded successfully");
+});

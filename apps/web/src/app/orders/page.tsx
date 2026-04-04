@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { orderAPI } from "@/lib/services";
 import { Order } from "@/types";
 import { getProductImageUrl } from "@/lib/utils";
+import { LoadingSpinner } from "@/components/admin/LoadingSpinner";
 
 export default function OrdersPage() {
   const router = useRouter();
@@ -37,7 +38,7 @@ export default function OrdersPage() {
     }
   };
 
-  if (loading) return <div className="text-center py-20">Loading...</div>;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="min-h-screen bg-white">

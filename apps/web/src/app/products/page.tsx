@@ -8,18 +8,20 @@ import { productAPI, cartAPI } from "@/lib/services";
 import { Product } from "@/types";
 import { useRouter } from "next/navigation";
 import { getProductImageUrl } from "@/lib/utils";
+import { useCartSheetStore } from "@/store/cartSheetStore";
+import { toast } from "sonner";
+import { LoadingSpinner } from "@/components/admin/LoadingSpinner";
 
 export default function ProductsPage() {
   const router = useRouter();
   const { user, restoreFromStorage } = useAuthStore();
-  const { addItem } = useCartStore();
+  const { addItem, updateQuantity } = useCartStore();
+  const { onOpen } = useCartSheetStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log("ProductsPage: restoreFromStorage start");
     restoreFromStorage();
-    console.log("ProductsPage: restoreFromStorage done, user:", useAuthStore.getState().user?.email);
     loadProducts();
   }, []);
 
@@ -41,14 +43,29 @@ export default function ProductsPage() {
     }
 
     try {
-      await cartAPI.addItem({ productId: product.id, quantity: 1 });
-      alert("Product added to cart!");
+      const { items } = useCartStore.getState();
+      const existingItem = items.find((item) => item.productId === product.id);
+
+      if (existingItem) {
+        const newQuantity = existingItem.quantity + 1;
+        await cartAPI.updateItem(existingItem.id, { quantity: newQuantity });
+        updateQuantity(existingItem.id, newQuantity);
+      } else {
+        const response = await cartAPI.addItem({
+          productId: product.id,
+          quantity: 1,
+        });
+        addItem(response);
+      }
+
+      onOpen(); // Open the cart sheet after adding
+      toast.success("Added to cart!");
     } catch (err) {
-      alert("Failed to add to cart");
+      toast.error("Failed to add to cart");
     }
   };
 
-  if (loading) return <div className="text-center py-20">Loading...</div>;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="min-h-screen bg-white">

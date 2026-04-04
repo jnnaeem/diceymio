@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
+import CartSheet from "@/components/cart/CartSheet";
 
 export const metadata: Metadata = {
   title: "Diceymio - Board Game Universe",
@@ -68,6 +69,7 @@ export default function RootLayout({
         >
           {children}
           <Toaster />
+          <CartSheet />
         </ThemeProvider>
       </body>
     </html>

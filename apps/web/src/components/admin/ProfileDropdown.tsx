@@ -62,7 +62,7 @@ export default function ProfileDropdown() {
 
         {/* Menu Items */}
         <DropdownMenuGroup>
-          <Link href="/profile" className="cursor-pointer">
+          <Link href="/dashboard/profile" className="cursor-pointer">
             <DropdownMenuItem className="flex items-center gap-2 text-sm font-medium text-[#475569] dark:text-[#94a3b8] capitalize px-3 py-1.5 hover:bg-[#e2e8f0]! dark:hover:bg-[#334155]! cursor-pointer">
               <User />
               Profile

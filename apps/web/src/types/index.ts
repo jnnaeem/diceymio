@@ -70,6 +70,7 @@ export type User = {
   email: string;
   firstName?: string;
   lastName?: string;
+  phone?: string;
   role: "CUSTOMER" | "ADMIN";
   isActive: boolean;
   emailVerified: boolean;

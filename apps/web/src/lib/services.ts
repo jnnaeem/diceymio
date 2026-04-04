@@ -16,6 +16,21 @@ export const authAPI = {
     const response = await api.post("/auth/login", data);
     return response.data.data as AuthResponse;
   },
+
+  getMe: async () => {
+    const response = await api.get("/auth/me");
+    return response.data.data;
+  },
+
+  updateProfile: async (data: { firstName?: string; lastName?: string; phone?: string }) => {
+    const response = await api.patch("/auth/profile", data);
+    return response.data.data;
+  },
+
+  changePassword: async (data: { currentPassword?: string; newPassword?: string }) => {
+    const response = await api.patch("/auth/change-password", data);
+    return response.data.data;
+  },
 };
 
 export const productAPI = {

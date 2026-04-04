@@ -10,6 +10,7 @@ import {
   ShoppingCart,
   Users,
   Package,
+  User,
   LogOut,
   ChevronRight,
 } from "lucide-react";
@@ -49,6 +50,11 @@ const navItems: NavItem[] = [
     title: "Customers",
     href: "/dashboard/customers",
     icon: Users,
+  },
+  {
+    title: "Profile",
+    href: "/dashboard/profile",
+    icon: User,
   },
 ];
 

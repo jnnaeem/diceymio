@@ -5,40 +5,30 @@ import Link from "next/link";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { orderAPI } from "@/lib/services";
+import { toast } from "sonner";
 import { Order } from "@/types";
 import { getProductImageUrl } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/admin/LoadingSpinner";
+import useSWR from "swr";
 
 export default function OrdersPage() {
   const router = useRouter();
   const { user, restoreFromStorage } = useAuthStore();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: orders = [], error, isLoading: loading } = useSWR<Order[]>(user ? 'storefrontOrders' : null, orderAPI.getOrders);
+  const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
     restoreFromStorage();
+    setAuthLoading(false);
   }, []);
 
   useEffect(() => {
-    if (!user && !loading) {
+    if (!authLoading && !user) {
       router.push("/auth/login");
-    } else if (user) {
-      loadOrders();
     }
-  }, [user]);
+  }, [user, authLoading, router]);
 
-  const loadOrders = async () => {
-    try {
-      const data = await orderAPI.getOrders();
-      setOrders(data);
-    } catch (err) {
-      console.error("Failed to load orders");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) return <LoadingSpinner />;
+  if (authLoading || loading) return <LoadingSpinner />;
 
   return (
     <div className="min-h-screen bg-white">
@@ -116,7 +106,7 @@ export default function OrdersPage() {
                         key={item.id}
                         className="flex gap-4 items-center border-b border-gray-100 last:border-0 pb-4 last:pb-0"
                       >
-                        <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded border border-gray-200">
+                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded border border-gray-200">
                           <img
                             src={getProductImageUrl(item.product.image)!}
                             alt={item.product.name}

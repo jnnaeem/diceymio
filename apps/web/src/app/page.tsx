@@ -5,15 +5,33 @@ import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
 import { useCartSheetStore } from "@/store/cartSheetStore";
 import { useEffect } from "react";
+import { ShoppingCart } from "lucide-react";
+import { cartAPI } from "@/lib/services";
+import { toast } from "sonner";
+import useSWR from "swr";
 
 export default function Home() {
   const { user, restoreFromStorage } = useAuthStore();
-  const { items } = useCartStore();
+  const { items, setItems } = useCartStore();
   const { onOpen } = useCartSheetStore();
 
   useEffect(() => {
     restoreFromStorage();
   }, [restoreFromStorage]);
+
+  const { data: cartData, error } = useSWR(user ? 'storefrontCart' : null, cartAPI.getCart);
+
+  useEffect(() => {
+    if (cartData) {
+      setItems(cartData.items);
+    }
+  }, [cartData, setItems]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error("Failed to sync cart data");
+    }
+  }, [error]);
 
   return (
     <div className="min-h-screen bg-[#f8fafc] selection:bg-blue-100">
@@ -25,7 +43,7 @@ export default function Home() {
               <span className="text-3xl filter transition-transform group-hover:rotate-12 duration-300">
                 🎲
               </span>
-              <span className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+              <span className="text-2xl font-black bg-clip-text text-transparent bg-linear-to-r from-blue-600 to-indigo-600">
                 Diceymio
               </span>
             </Link>
@@ -47,13 +65,12 @@ export default function Home() {
                   </Link>
                   <button
                     onClick={onOpen}
-                    className="relative group cursor-pointer"
+                    className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors cursor-pointer group"
+                    title="Cart"
                   >
-                    <span className="text-sm font-medium text-gray-600 group-hover:text-blue-600 transition-colors uppercase tracking-widest text-[10px]">
-                      Cart
-                    </span>
-                    {items.length > 0 && (
-                      <span className="absolute -top-2 -right-3 size-4 bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center rounded-full">
+                    <ShoppingCart className="size-5" />
+                    {items?.length > 0 && (
+                      <span className="absolute top-0 right-0 size-4 bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center rounded-full">
                         {items.length}
                       </span>
                     )}
@@ -66,7 +83,7 @@ export default function Home() {
                       Dashboard
                     </Link>
                   )}
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200">
+                  <div className="w-10 h-10 rounded-full bg-linear-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200">
                     {user.firstName?.[0] || user.email[0].toUpperCase()}
                   </div>
                 </>
@@ -106,7 +123,7 @@ export default function Home() {
                 </div>
                 <h1 className="text-5xl sm:text-7xl font-extrabold text-slate-900 leading-[1.1] mb-8">
                   Elevate Your <br />
-                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+                  <span className="bg-clip-text text-transparent bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600">
                     Game Night
                   </span>
                 </h1>
@@ -138,9 +155,9 @@ export default function Home() {
               </div>
 
               <div className="relative group">
-                <div className="absolute -inset-4 bg-gradient-to-r from-blue-100 to-purple-100 rounded-[3rem] blur-2xl opacity-50 group-hover:opacity-75 transition-opacity duration-500"></div>
-                <div className="relative aspect-[4/3] rounded-[2.5rem] overflow-hidden shadow-2xl glass p-2 border border-white/40">
-                  <div className="absolute inset-x-0 bottom-0 p-8 z-20 bg-gradient-to-t from-slate-900/40 to-transparent">
+                <div className="absolute -inset-4 bg-linear-to-r from-blue-100 to-purple-100 rounded-[3rem] blur-2xl opacity-50 group-hover:opacity-75 transition-opacity duration-500"></div>
+                <div className="relative aspect-4/3 rounded-[2.5rem] overflow-hidden shadow-2xl glass p-2 border border-white/40">
+                  <div className="absolute inset-x-0 bottom-0 p-8 z-20 bg-linear-to-t from-slate-900/40 to-transparent">
                     <p className="text-white font-medium text-lg leading-snug">
                       "Diceymio has the best selection of Eurogames I've seen.
                       Fast shipping and great support!"

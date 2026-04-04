@@ -35,45 +35,41 @@ import { SearchBar } from "@/components/admin/SearchBar";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { Pagination } from "@/components/admin/Pagination";
 import { getProductImageUrl } from "@/lib/utils";
+import { ConfirmModal } from "@/components/admin/ConfirmModal";
+import { toast } from "sonner";
+import useSWR from "swr";
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: products = [],
+    error,
+    isLoading: loading,
+    mutate,
+  } = useSWR("adminProducts", adminProductAPI.getAll);
   const [search, setSearch] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
-  useEffect(() => {
-    loadProducts();
-  }, []);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     setPage(1);
   };
 
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
-      const data = await adminProductAPI.getAll();
-      setProducts(data);
-    } catch (err) {
-      console.error("Failed to load products:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleDelete = async (id: string) => {
     try {
+      setIsDeleting(true);
       await adminProductAPI.delete(id);
+      toast.success("Product deleted successfully");
+      mutate();
       setDeleteConfirm(null);
-      loadProducts();
     } catch (err) {
-      console.error("Failed to delete product:", err);
+      toast.error("Failed to delete product");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -155,7 +151,11 @@ export default function ProductsPage() {
           {filtered.length === 0 ? (
             <EmptyState
               icon={PackageSearch}
-              title={searchTerm || statusFilter !== "ALL" ? "No products found" : "No products yet"}
+              title={
+                searchTerm || statusFilter !== "ALL"
+                  ? "No products found"
+                  : "No products yet"
+              }
               description={
                 searchTerm || statusFilter !== "ALL"
                   ? "There are no products matching your filters"
@@ -250,42 +250,21 @@ export default function ProductsPage() {
                           asChild
                           variant="outline"
                           size="icon"
-                          className="h-8 w-8 hover:bg-slate-50 dark:hover:bg-slate-800"
+                          className="h-8 w-8 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer active:scale-95 transition-all"
                         >
                           <Link href={`/dashboard/products/${product.id}/edit`}>
                             <Edit className="h-4 w-4" />
                           </Link>
                         </Button>
 
-                        {deleteConfirm === product.id ? (
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              className="h-8 shadow-sm"
-                              onClick={() => handleDelete(product.id)}
-                            >
-                              Confirm
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 shadow-sm"
-                              onClick={() => setDeleteConfirm(null)}
-                            >
-                              Cancel
-                            </Button>
-                          </div>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                            onClick={() => setDeleteConfirm(product.id)}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        )}
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive cursor-pointer active:scale-95 transition-all"
+                          onClick={() => setDeleteConfirm(product.id)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -311,6 +290,15 @@ export default function ProductsPage() {
           )}
         </CardContent>
       </Card>
+
+      <ConfirmModal
+        isOpen={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={() => deleteConfirm && handleDelete(deleteConfirm)}
+        title="Delete Product"
+        description="Are you sure you want to delete this product? This action cannot be undone."
+        loading={isDeleting}
+      />
     </div>
   );
 }

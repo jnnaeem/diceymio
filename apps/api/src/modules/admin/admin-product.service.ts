@@ -4,6 +4,7 @@ import { CreateProductInput, UpdateProductInput } from "./admin-product.validati
 
 export const listAllProductsAdmin = async () => {
   return prisma.product.findMany({
+    where: { isActive: true },
     orderBy: { createdAt: "desc" },
   });
 };
@@ -44,8 +45,14 @@ export const deleteProduct = async (id: string) => {
     throw new NotFoundError("Product not found");
   }
 
-  return prisma.product.update({
-    where: { id },
-    data: { isActive: false },
-  });
+  try {
+    return await prisma.product.delete({
+      where: { id },
+    });
+  } catch (error) {
+    return prisma.product.update({
+      where: { id },
+      data: { isActive: false },
+    });
+  }
 };

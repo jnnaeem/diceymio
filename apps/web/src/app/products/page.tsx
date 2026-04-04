@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import useSWR from "swr";
 import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
 import { productAPI, cartAPI } from "@/lib/services";
@@ -17,24 +18,12 @@ export default function ProductsPage() {
   const { user, restoreFromStorage } = useAuthStore();
   const { addItem, updateQuantity } = useCartStore();
   const { onOpen } = useCartSheetStore();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  const { data: products = [], error, isLoading: loading } = useSWR<Product[]>('storefrontProducts', productAPI.getAll);
 
   useEffect(() => {
     restoreFromStorage();
-    loadProducts();
   }, []);
-
-  const loadProducts = async () => {
-    try {
-      const data = await productAPI.getAll();
-      setProducts(data);
-    } catch (err) {
-      console.error("Failed to load products");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleAddToCart = async (product: Product) => {
     if (!user) {

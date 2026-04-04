@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useCartStore } from "@/store/cartStore";
@@ -17,16 +17,16 @@ import { useAuthStore } from "@/store/authStore";
 
 export default function CartSheet() {
   const { isOpen, onClose } = useCartSheetStore();
-  const { 
-    items, 
-    setItems, 
-    removeItem, 
-    updateQuantity, 
-    getSubtotal, 
-    getDiscount, 
+  const {
+    items,
+    setItems,
+    removeItem,
+    updateQuantity,
+    getSubtotal,
+    getDiscount,
     getTotal,
     appliedCoupon,
-    setAppliedCoupon
+    setAppliedCoupon,
   } = useCartStore();
   const { user } = useAuthStore();
   const [loading, setLoading] = useState(false);
@@ -47,7 +47,7 @@ export default function CartSheet() {
       const data = await cartAPI.getCart();
       setItems(data.items);
     } catch (err) {
-      console.error("Failed to load cart");
+      toast.error("Failed to load cart");
     } finally {
       setLoading(false);
     }
@@ -77,10 +77,10 @@ export default function CartSheet() {
     if (!couponCode) return;
     setValidating(true);
     try {
-      const simplifiedItems = items.map(item => ({
+      const simplifiedItems = items.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,
-        price: item.product.price
+        price: item.product.price,
       }));
       const result = await couponAPI.validate(couponCode, simplifiedItems);
       setAppliedCoupon(result);
@@ -109,9 +109,7 @@ export default function CartSheet() {
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent 
-        className="w-full sm:max-w-md bg-[#0B1710] border-l border-[#1A2E23] text-white p-0 flex flex-col h-full"
-      >
+      <SheetContent className="w-full sm:max-w-md bg-[#0B1710] border-l border-[#1A2E23] text-white p-0 flex flex-col h-full">
         {/* Header */}
         <div className="p-6 pb-4 border-b border-[#1A2E23] flex justify-between items-center">
           <div className="flex items-center gap-3">
@@ -120,12 +118,6 @@ export default function CartSheet() {
               {items.length} {items.length === 1 ? "item" : "items"}
             </span>
           </div>
-          <button 
-            onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
-            <X className="size-5" />
-          </button>
         </div>
 
         {/* Content */}
@@ -158,9 +150,9 @@ export default function CartSheet() {
                       <h3 className="text-sm font-bold text-gray-100 line-clamp-1">
                         {item.product.name}
                       </h3>
-                      <button 
+                      <button
                         onClick={() => handleRemoveItem(item.id)}
-                        className="text-gray-500 hover:text-red-400 transition-colors shrink-0 p-1 bg-[#1A2E23] rounded-md border border-[#2B4738]"
+                        className="text-gray-500 hover:text-red-400 shrink-0 p-2 bg-[#1A2E23] rounded-md border border-[#2B4738] cursor-pointer active:scale-95 transition-all"
                       >
                         <Trash2 className="size-4" />
                       </button>
@@ -171,14 +163,17 @@ export default function CartSheet() {
                         TK. {item.product.price.toLocaleString()}
                       </span>
                       <span className="text-[11px] text-gray-500 line-through">
-                        TK. {(item.product.price * 1.2).toFixed(0).toLocaleString()}
+                        TK.{" "}
+                        {(item.product.price * 1.2).toFixed(0).toLocaleString()}
                       </span>
                     </div>
 
                     {/* Quantity Controls */}
                     <div className="flex items-center w-fit bg-[#1A2E23] rounded-lg border border-[#2B4738] overflow-hidden mt-2">
-                      <button 
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                      <button
+                        onClick={() =>
+                          handleUpdateQuantity(item.id, item.quantity - 1)
+                        }
                         className="px-2 py-1 hover:bg-[#2B4738] transition-colors text-gray-400"
                       >
                         <Minus className="size-3" />
@@ -186,8 +181,10 @@ export default function CartSheet() {
                       <span className="px-3 text-xs font-bold text-gray-100 min-w-[24px] text-center border-x border-[#2B4738]">
                         {item.quantity}
                       </span>
-                      <button 
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                      <button
+                        onClick={() =>
+                          handleUpdateQuantity(item.id, item.quantity + 1)
+                        }
                         className="px-2 py-1 hover:bg-[#2B4738] transition-colors text-gray-300"
                       >
                         <Plus className="size-3" />
@@ -207,7 +204,7 @@ export default function CartSheet() {
             {!appliedCoupon ? (
               <div className="mb-6">
                 {!showCouponInput ? (
-                  <button 
+                  <button
                     onClick={() => setShowCouponInput(true)}
                     className="text-[10px] font-bold text-gray-300 hover:text-white transition-colors underline underline-offset-4 tracking-widest uppercase flex items-center gap-2"
                   >
@@ -215,29 +212,30 @@ export default function CartSheet() {
                   </button>
                 ) : (
                   <div className="flex gap-2">
-                    <input 
-                      type="text" 
-                      placeholder="COUPON CODE" 
+                    <input
+                      type="text"
+                      placeholder="COUPON CODE"
                       value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      onChange={(e) =>
+                        setCouponCode(e.target.value.toUpperCase())
+                      }
                       className="flex-1 bg-[#1A2E23] border border-[#2B4738] rounded-lg px-3 py-2 text-xs font-bold tracking-widest placeholder:text-gray-600 focus:outline-none focus:border-[#55FF82] transition-colors uppercase"
                     />
-                    <button 
+                    <button
                       onClick={handleApplyCoupon}
                       disabled={validating || !couponCode}
                       className="bg-[#55FF82] text-[#0A140F] px-4 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-[#45EE72] transition-all disabled:opacity-50 disabled:grayscale"
                     >
                       {validating ? "..." : "APPLY"}
                     </button>
-                    <button 
+                    <button
                       onClick={() => setShowCouponInput(false)}
                       className="text-gray-500 hover:text-white"
                     >
                       <X className="size-4" />
                     </button>
                   </div>
-                )
-              }
+                )}
               </div>
             ) : (
               <div className="flex items-center justify-between bg-[#1D4D32]/30 border border-[#1D4D32] rounded-lg p-3 mb-6">
@@ -246,11 +244,15 @@ export default function CartSheet() {
                     <BadgePercent className="size-4 text-[#55FF82]" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-[#55FF82] tracking-widest uppercase">Coupon Applied</p>
-                    <p className="text-xs font-black text-white">{appliedCoupon.code}</p>
+                    <p className="text-[10px] font-bold text-[#55FF82] tracking-widest uppercase">
+                      Coupon Applied
+                    </p>
+                    <p className="text-xs font-black text-white">
+                      {appliedCoupon.code}
+                    </p>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={handleRemoveCoupon}
                   className="text-gray-500 hover:text-red-400 transition-colors"
                 >
@@ -261,26 +263,34 @@ export default function CartSheet() {
 
             <div className="space-y-3 mb-6">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-medium text-gray-500">SUBTOTAL</span>
-                <span className="text-sm font-bold text-gray-200">TK. {subtotal.toLocaleString()}</span>
+                <span className="text-xs font-medium text-gray-500">
+                  SUBTOTAL
+                </span>
+                <span className="text-sm font-bold text-gray-200">
+                  TK. {subtotal.toLocaleString()}
+                </span>
               </div>
-              
+
               {discount > 0 && (
                 <div className="flex justify-between items-center text-[#55FF82]">
                   <span className="text-xs font-medium">DISCOUNT</span>
-                  <span className="text-sm font-bold">- TK. {discount.toLocaleString()}</span>
+                  <span className="text-sm font-bold">
+                    - TK. {discount.toLocaleString()}
+                  </span>
                 </div>
               )}
 
               <div className="flex justify-between items-center pt-2 border-t border-[#1A2E23]">
                 <span className="text-sm font-bold text-gray-100">TOTAL</span>
-                <span className="text-lg font-black text-white">TK. {total.toLocaleString()}</span>
+                <span className="text-lg font-black text-white">
+                  TK. {total.toLocaleString()}
+                </span>
               </div>
             </div>
 
-            <button 
+            <button
               onClick={handlePlaceOrder}
-              className="w-full bg-[#E5E961] hover:bg-[#D4D84F] text-[#0A140F] font-black py-4 rounded-xl transition-all active:scale-[0.98] shadow-[0_0_20px_rgba(229,233,97,0.15)] uppercase tracking-wider text-xs"
+              className="w-full bg-[#E5E961] hover:bg-[#D4D84F] text-[#0A140F] font-black py-4 rounded-xl transition-all active:scale-95 shadow-[0_0_20px_rgba(229,233,97,0.15)] uppercase tracking-wider text-xs cursor-pointer"
             >
               Place Order (COD)
             </button>

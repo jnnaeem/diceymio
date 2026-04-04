@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { adminOrderAPI } from "@/lib/adminServices";
+import useSWR from "swr";
+import { toast } from "sonner";
 import { Order } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,30 +45,13 @@ const ORDER_STATUSES = [
 ];
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: orders = [], error, isLoading: loading, mutate } = useSWR('adminOrders', adminOrderAPI.getAll);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
-  useEffect(() => {
-    loadOrders();
-  }, []);
-
-  const loadOrders = async () => {
-    try {
-      setLoading(true);
-      const data = await adminOrderAPI.getAll();
-      setOrders(data);
-    } catch (err) {
-      console.error("Failed to load orders:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
@@ -77,13 +62,10 @@ export default function OrdersPage() {
     try {
       setUpdatingId(orderId);
       await adminOrderAPI.updateStatus(orderId, newStatus);
-      setOrders((prev) =>
-        prev.map((o) =>
-          o.id === orderId ? { ...o, status: newStatus as any } : o
-        )
-      );
+      toast.success("Order status updated successfully");
+      mutate();
     } catch (err) {
-      console.error("Failed to update order status:", err);
+      toast.error("Failed to update order status");
     } finally {
       setUpdatingId(null);
     }
@@ -141,7 +123,7 @@ export default function OrdersPage() {
         <Button
           variant="outline"
           size="icon"
-          onClick={() => loadOrders()}
+          onClick={() => mutate()}
           className="bg-white dark:bg-[#27292D] size-11 hover:bg-card active:scale-95 transition-all cursor-pointer shrink-0"
           title="Refresh"
         >

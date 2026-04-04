@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
+import useSWR from "swr";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -74,7 +75,6 @@ export default function EditCouponPage() {
   const id = params.id as string;
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
-  const [fetching, setFetching] = useState(true);
 
   const form = useForm<CouponFormValues>({
     resolver: zodResolver(couponSchema),
@@ -88,41 +88,46 @@ export default function EditCouponPage() {
     },
   });
 
+  const fetcher = async () => {
+    const [productsData, couponData] = await Promise.all([
+      productAPI.getAll(),
+      couponAPI.getById(id),
+    ]);
+    return { productsData, couponData };
+  };
+
+  const { data, error, isLoading: fetching } = useSWR(['couponInit', id], fetcher);
+
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [productsData, couponData] = await Promise.all([
-          productAPI.getAll(),
-          couponAPI.getById(id),
-        ]);
-        setProducts(productsData);
+    if (data) {
+      setProducts(data.productsData);
+      
+      const formatDate = (dateString?: string | null | Date) => {
+        if (!dateString) return "";
+        return new Date(dateString).toISOString().slice(0, 16);
+      };
 
-        const formatDate = (dateString?: string | null | Date) => {
-          if (!dateString) return "";
-          return new Date(dateString).toISOString().slice(0, 16);
-        };
+      form.reset({
+        code: data.couponData.code,
+        discountType: data.couponData.discountType,
+        discountValue: Number(data.couponData.discountValue),
+        minOrderAmount: Number(data.couponData.minOrderAmount || 0),
+        maxDiscount: Number(data.couponData.maxDiscount || 0),
+        startDate: formatDate(data.couponData.startDate),
+        endDate: formatDate(data.couponData.endDate),
+        usageLimit: data.couponData.usageLimit || undefined,
+        isActive: data.couponData.isActive,
+        productId: data.couponData.productId || "all",
+      });
+    }
+  }, [data, form]);
 
-        form.reset({
-          code: couponData.code,
-          discountType: couponData.discountType,
-          discountValue: Number(couponData.discountValue),
-          minOrderAmount: Number(couponData.minOrderAmount || 0),
-          maxDiscount: Number(couponData.maxDiscount || 0),
-          startDate: formatDate(couponData.startDate),
-          endDate: formatDate(couponData.endDate),
-          usageLimit: couponData.usageLimit || undefined,
-          isActive: couponData.isActive,
-          productId: couponData.productId || "all",
-        });
-      } catch (err) {
-        toast.error("Failed to load coupon data");
-        router.push("/dashboard/coupons");
-      } finally {
-        setFetching(false);
-      }
-    };
-    loadData();
-  }, [id, router, form]);
+  useEffect(() => {
+    if (error) {
+      toast.error("Failed to load coupon data");
+      router.push("/dashboard/coupons");
+    }
+  }, [error, router]);
 
   async function onSubmit(values: CouponFormValues) {
     setLoading(true);
@@ -140,7 +145,7 @@ export default function EditCouponPage() {
       toast.success("Coupon updated successfully");
       router.push("/dashboard/coupons");
     } catch (err) {
-      toast.error("Failed to create coupon");
+      toast.error("Failed to update coupon");
     } finally {
       setLoading(false);
     }

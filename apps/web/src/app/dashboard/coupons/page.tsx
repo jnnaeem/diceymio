@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import useSWR from "swr";
 import {
   Plus,
   Ticket,
@@ -12,6 +13,7 @@ import {
   CheckCircle2,
   XCircle,
   RotateCw,
+  Trash,
 } from "lucide-react";
 import { couponAPI } from "@/lib/services";
 import { Coupon } from "@/types";
@@ -36,35 +38,25 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
+import { ConfirmModal } from "@/components/admin/ConfirmModal";
 
 export default function CouponsPage() {
-  const [coupons, setCoupons] = useState<Coupon[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: coupons = [], error, isLoading: loading, mutate } = useSWR('adminCoupons', couponAPI.getAll);
   const [searchQuery, setSearchQuery] = useState("");
-
-  const loadCoupons = async () => {
-    try {
-      const data = await couponAPI.getAll();
-      setCoupons(data);
-    } catch (err) {
-      toast.error("Failed to load coupons");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadCoupons();
-  }, []);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this coupon?")) return;
     try {
+      setIsDeleting(true);
       await couponAPI.delete(id);
       toast.success("Coupon deleted successfully");
-      setCoupons(coupons.filter((c) => c.id !== id));
+      setDeleteConfirm(null);
+      mutate();
     } catch (err) {
       toast.error("Failed to delete coupon");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -87,7 +79,7 @@ export default function CouponsPage() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => loadCoupons()}
+            onClick={() => mutate()}
             className="bg-white dark:bg-[#27292D] size-9.5 hover:bg-card active:scale-95 transition-all cursor-pointer shrink-0"
             title="Refresh"
           >
@@ -219,33 +211,27 @@ export default function CouponsPage() {
                         )}
                       </Badge>
                     </TableCell>
-                    <TableCell className="px-6 py-4 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="size-8 p-0 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
-                          >
-                            <MoreVertical className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          className="w-32 rounded-xl dark:bg-[#191B1F] dark:border-slate-800"
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          asChild
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer active:scale-95 transition-all"
                         >
                           <Link href={`/dashboard/coupons/${coupon.id}`}>
-                            <DropdownMenuItem className="gap-2 cursor-pointer">
-                              <Edit className="size-4" /> Edit
-                            </DropdownMenuItem>
+                            <Edit className="h-4 w-4" />
                           </Link>
-                          <DropdownMenuItem
-                            className="gap-2 text-red-600 focus:text-red-600 cursor-pointer"
-                            onClick={() => handleDelete(coupon.id)}
-                          >
-                            <Trash2 className="size-4" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive cursor-pointer active:scale-95 transition-all"
+                          onClick={() => setDeleteConfirm(coupon.id)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -254,6 +240,15 @@ export default function CouponsPage() {
           )}
         </CardContent>
       </Card>
+
+      <ConfirmModal
+        isOpen={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={() => deleteConfirm && handleDelete(deleteConfirm)}
+        title="Delete Coupon"
+        description="Are you sure you want to delete this coupon? This action cannot be undone."
+        loading={isDeleting}
+      />
     </div>
   );
 }

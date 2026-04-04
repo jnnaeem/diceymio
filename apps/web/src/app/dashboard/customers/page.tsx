@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { adminUserAPI } from "@/lib/adminServices";
+import useSWR from "swr";
+import { toast } from "sonner";
 import { User } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,29 +36,12 @@ import { EmptyState } from "@/components/admin/EmptyState";
 import { Pagination } from "@/components/admin/Pagination";
 
 export default function CustomersPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: users = [], error, isLoading: loading, mutate } = useSWR('adminCustomers', adminUserAPI.getAll);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
   
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
-    try {
-      setLoading(true);
-      const data = await adminUserAPI.getAll();
-      setUsers(data);
-    } catch (err) {
-      console.error("Failed to load users:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
@@ -96,7 +81,7 @@ export default function CustomersPage() {
         <Button
           variant="outline"
           size="icon"
-          onClick={() => loadUsers()}
+          onClick={() => mutate()}
           className="bg-white dark:bg-[#27292D] size-11 hover:bg-card active:scale-95 transition-all cursor-pointer shrink-0"
           title="Refresh"
         >

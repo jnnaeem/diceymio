@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import useSWR from "swr";
 import { adminProductAPI } from "@/lib/adminServices";
 import { productAPI } from "@/lib/services";
 import { useForm } from "react-hook-form";
@@ -21,6 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ArrowLeft, Loader2, Image as ImageIcon } from "lucide-react";
+import { toast } from "sonner";
 import { LoadingSpinner } from "@/components/admin/LoadingSpinner";
 import { ImageUpload } from "@/components/ui/image-upload";
 
@@ -39,7 +41,6 @@ export default function EditProductPage() {
   const params = useParams();
   const productId = params.id as string;
 
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -54,13 +55,10 @@ export default function EditProductPage() {
     },
   });
 
-  useEffect(() => {
-    loadProduct();
-  }, [productId]);
+  const { data: product, error: fetchError, isLoading } = useSWR(['adminProduct', productId], () => productAPI.getOne(productId));
 
-  const loadProduct = async () => {
-    try {
-      const product = await productAPI.getOne(productId);
+  useEffect(() => {
+    if (product) {
       form.reset({
         name: product.name || "",
         description: product.description || "",
@@ -68,12 +66,14 @@ export default function EditProductPage() {
         stock: String(product.stock),
         image: product.image || "",
       });
-    } catch (err) {
-      setError("Product not found");
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [product, form]);
+
+  useEffect(() => {
+    if (fetchError) {
+      setError("Product not found");
+    }
+  }, [fetchError]);
 
   const onSubmit = async (data: ProductFormData) => {
     setError("");
@@ -86,15 +86,17 @@ export default function EditProductPage() {
         stock: parseInt(data.stock || "0"),
         image: data.image?.trim() || undefined,
       });
+      toast.success("Product updated successfully");
       router.push("/dashboard/products");
     } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to update product");
       setError(err?.response?.data?.message || "Failed to update product");
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingSpinner />;
   }
 

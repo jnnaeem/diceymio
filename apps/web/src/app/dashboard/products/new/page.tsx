@@ -63,6 +63,7 @@ export default function NewProductPage() {
       toast.success("Product created successfully");
       router.push("/dashboard/products");
     } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to create product");
       setError(err?.response?.data?.message || "Failed to create product");
     } finally {
       setLoading(false);

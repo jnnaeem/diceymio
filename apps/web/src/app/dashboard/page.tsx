@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import useSWR from "swr";
 import { adminUserAPI, adminOrderAPI } from "@/lib/adminServices";
+import { toast } from "sonner";
 import { Order } from "@/types";
 import {
   Table,
@@ -41,28 +43,17 @@ type Stats = {
 };
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    RefetchData();
-  }, []);
-
-  const RefetchData = async () => {
-    try {
-      const [statsData, ordersData] = await Promise.all([
-        adminUserAPI.getStats(),
-        adminOrderAPI.getAll(),
-      ]);
-      setStats(statsData);
-      setRecentOrders(ordersData.slice(0, 10));
-    } catch (err) {
-      console.error("Failed to load dashboard data:", err);
-    } finally {
-      setLoading(false);
-    }
+  const fetcher = async () => {
+    const [statsData, ordersData] = await Promise.all([
+      adminUserAPI.getStats(),
+      adminOrderAPI.getAll(),
+    ]);
+    return { stats: statsData as Stats, recentOrders: ordersData.slice(0, 10) as Order[] };
   };
+
+  const { data, error, isLoading: loading, mutate } = useSWR('dashboardMain', fetcher);
+  const stats = data?.stats || null;
+  const recentOrders = data?.recentOrders || [];
 
   if (loading) {
     return <LoadingSpinner />;
@@ -83,7 +74,7 @@ export default function DashboardPage() {
         <Button
           variant="outline"
           size="icon"
-          onClick={() => RefetchData()}
+          onClick={() => mutate()}
           className="bg-white dark:bg-[#27292D] size-11 hover:bg-card active:scale-95 transition-all cursor-pointer shrink-0"
           title="Refresh"
         >

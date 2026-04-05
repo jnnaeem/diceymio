@@ -9,6 +9,7 @@ import { ShoppingCart } from "lucide-react";
 import { cartAPI } from "@/lib/services";
 import { toast } from "sonner";
 import useSWR from "swr";
+import { HeroSlider } from "@/components/home/HeroSlider";
 
 export default function Home() {
   const { user, restoreFromStorage } = useAuthStore();
@@ -19,7 +20,10 @@ export default function Home() {
     restoreFromStorage();
   }, [restoreFromStorage]);
 
-  const { data: cartData, error } = useSWR(user ? 'storefrontCart' : null, cartAPI.getCart);
+  const { data: cartData, error } = useSWR(
+    user ? "storefrontCart" : null,
+    cartAPI.getCart
+  );
 
   useEffect(() => {
     if (cartData) {
@@ -109,69 +113,7 @@ export default function Home() {
       </nav>
 
       <main>
-        {/* Hero Section */}
-        <section className="relative overflow-hidden pt-24 pb-16 lg:pt-32 lg:pb-32">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
-              <div className="text-center lg:text-left mb-12 lg:mb-0">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-wider mb-6 animate-fade-in">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                  </span>
-                  New Arrivals Available
-                </div>
-                <h1 className="text-5xl sm:text-7xl font-extrabold text-slate-900 leading-[1.1] mb-8">
-                  Elevate Your <br />
-                  <span className="bg-clip-text text-transparent bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600">
-                    Game Night
-                  </span>
-                </h1>
-                <p className="text-lg text-slate-600 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                  Discover an expertly curated collection of top-tier board
-                  games. From strategy masterpieces to hilarious party games, we
-                  bring world-class entertainment to your tabletop.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                  <Link
-                    href="/products"
-                    className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 hover:shadow-2xl transition-all hover:-translate-y-1 active:scale-95 text-center"
-                  >
-                    Explore Collection
-                  </Link>
-                  <Link
-                    href="/how-it-works"
-                    className="px-8 py-4 bg-white text-slate-900 border border-slate-200 rounded-2xl font-bold hover:bg-slate-50 transition-all text-center"
-                  >
-                    Learn More
-                  </Link>
-                </div>
-
-                <div className="mt-12 flex items-center justify-center lg:justify-start gap-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-                  <div className="font-bold text-slate-900 italic">
-                    Trusted by 10k+ Gamers
-                  </div>
-                </div>
-              </div>
-
-              <div className="relative group">
-                <div className="absolute -inset-4 bg-linear-to-r from-blue-100 to-purple-100 rounded-[3rem] blur-2xl opacity-50 group-hover:opacity-75 transition-opacity duration-500"></div>
-                <div className="relative aspect-4/3 rounded-[2.5rem] overflow-hidden shadow-2xl glass p-2 border border-white/40">
-                  <div className="absolute inset-x-0 bottom-0 p-8 z-20 bg-linear-to-t from-slate-900/40 to-transparent">
-                    <p className="text-white font-medium text-lg leading-snug">
-                      "Diceymio has the best selection of Eurogames I've seen.
-                      Fast shipping and great support!"
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Decorative Elements */}
-          <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[600px] h-[600px] bg-blue-100/30 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-[400px] h-[400px] bg-indigo-100/30 rounded-full blur-3xl"></div>
-        </section>
+        <HeroSlider />
 
         {/* Features Section */}
         <section className="py-24 bg-white border-y border-slate-100">

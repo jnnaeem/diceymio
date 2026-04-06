@@ -75,7 +75,7 @@ export default function Footer() {
             <Link href="/" className="inline-block">
               <Image src={Logo} alt="Logo" />
             </Link>
-            <p className="text-[#FEF5DECC] text-sm leading-relaxed my-6 max-w-[280px]">
+            <p className="text-[#FEF5DECC] text-sm leading-relaxed my-6 sm:max-w-[280px]">
               Enter a world of strategic board games, epic adventures, and
               unforgettable gaming experiences with friends and family.
             </p>
@@ -197,7 +197,16 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="py-6 flex flex-wrap justify-between items-center gap-3 border-t border-[#A1A1A133]">
           <p className="text-xs text-[#FEF5DE80]">
-            © {new Date().getFullYear()} Diceymio. All rights reserved. | Developed by <a href="https://naeem.me" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">JN</a>
+            © {new Date().getFullYear()} Diceymio. All rights reserved. |
+            Developed by{" "}
+            <a
+              href="https://naeem.me"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+            >
+              JN
+            </a>
           </p>
           <div className="flex items-center gap-4">
             <Link

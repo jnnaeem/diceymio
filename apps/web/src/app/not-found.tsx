@@ -7,7 +7,7 @@ export default function NotFound() {
     <div className="relative min-h-svh w-full flex items-center justify-center overflow-hidden">
       {/* Background Image */}
       <div
-        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-60"
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/images/common-hero-bg.png')" }}
       />
 

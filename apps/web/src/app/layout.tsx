@@ -1,8 +1,26 @@
 import type { Metadata } from "next";
+import { Inter, Hind_Siliguri, Phudu } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import CartSheet from "@/components/cart/CartSheet";
+import Footer from "@/components/Footer";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const hindSiliguri = Hind_Siliguri({
+  weight: ["300", "400", "500", "600", "700"],
+  subsets: ["latin", "bengali"],
+  variable: "--font-hind",
+});
+
+const phudu = Phudu({
+  subsets: ["latin"],
+  variable: "--font-phudu",
+});
 
 export const metadata: Metadata = {
   title: "Diceymio - Board Game Universe",
@@ -47,19 +65,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} ${hindSiliguri.variable} ${phudu.variable}`}
+    >
+      <head />
       <body>
         <ThemeProvider
           attribute="class"
@@ -68,6 +79,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Footer />
           <Toaster />
           <CartSheet />
         </ThemeProvider>

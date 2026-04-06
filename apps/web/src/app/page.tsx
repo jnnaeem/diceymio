@@ -38,7 +38,7 @@ export default function Home() {
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] selection:bg-blue-100">
+    <div className="min-h-screen">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 glass border-b border-gray-200/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -171,92 +171,6 @@ export default function Home() {
           </div>
         </section>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-slate-900 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-            <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center gap-2 mb-8">
-                <span className="text-4xl">🎲</span>
-                <span className="text-2xl font-black text-white">Diceymio</span>
-              </div>
-              <p className="text-slate-400 max-w-sm leading-relaxed">
-                The ultimate destination for board game lovers. Quality service,
-                curated selection, and a community focus.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">
-                Shop
-              </h4>
-              <ul className="space-y-4 text-slate-400">
-                <li>
-                  <Link
-                    href="/products"
-                    className="hover:text-blue-400 transition-colors"
-                  >
-                    All Games
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/bundles"
-                    className="hover:text-blue-400 transition-colors"
-                  >
-                    Bundles
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/new"
-                    className="hover:text-blue-400 transition-colors"
-                  >
-                    New Arrivals
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">
-                Support
-              </h4>
-              <ul className="space-y-4 text-slate-400">
-                <li>
-                  <Link
-                    href="/shipping"
-                    className="hover:text-blue-400 transition-colors"
-                  >
-                    Shipping Info
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/returns"
-                    className="hover:text-blue-400 transition-colors"
-                  >
-                    Returns
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/contact"
-                    className="hover:text-blue-400 transition-colors"
-                  >
-                    Contact Us
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="pt-8 border-t border-slate-800 text-center text-slate-500 text-sm">
-            <p>
-              &copy; {new Date().getFullYear()} Diceymio. Designed for the
-              tabletop elite.
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

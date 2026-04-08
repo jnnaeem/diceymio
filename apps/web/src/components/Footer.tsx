@@ -75,7 +75,7 @@ export default function Footer() {
             <Link href="/" className="inline-block">
               <Image src={Logo} alt="Logo" />
             </Link>
-            <p className="text-[#FEF5DECC] text-sm leading-relaxed my-6 sm:max-w-[280px]">
+            <p className="text-[#FEF5DECC] text-sm leading-relaxed my-6 sm:max-w-70">
               Enter a world of strategic board games, epic adventures, and
               unforgettable gaming experiences with friends and family.
             </p>

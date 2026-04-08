@@ -1,5 +1,3 @@
-"use client";
-
 export function PrivacyPolicyContent() {
   return (
     <div className="relative overflow-hidden flex justify-center items-center py-16 lg:py-24">

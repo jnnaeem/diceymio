@@ -108,6 +108,7 @@ export default function Footer() {
                 { label: "Characters", href: "/characters" },
                 { label: "Games", href: "/products" },
                 { label: "How to Play", href: "/how-to-play" },
+                { label: "Privacy Policy", href: "/privacy-policy" },
               ].map((link) => (
                 <li key={link.label}>
                   <Link

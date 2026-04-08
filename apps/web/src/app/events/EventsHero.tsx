@@ -1,7 +1,7 @@
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
-export function PrivacyPolicyHero() {
+export function EventsHero() {
   return (
     <div className="relative overflow-hidden flex justify-center items-center">
       {/* Background Image */}
@@ -18,16 +18,16 @@ export function PrivacyPolicyHero() {
             Home
           </Link>
           <ChevronRight className="size-4" />
-          <span className="text-[#FEF5DE] text-sm">Privacy Policy</span>
+          <span className="text-[#FEF5DE] text-sm">Events</span>
         </nav>
 
         <h1 className="text-2xl md:text-3xl font-semibold text-[#FEF5DE] uppercase text-center">
-          Privacy Policy
+          Diceymio Events
         </h1>
         <p className="text-[#FEF5DECC] text-sm text-center sm:max-w-xl">
-          At Diceymio, we value your privacy and are committed to protecting
-          your personal information. This Privacy Policy outlines how we
-          collect, use, and safeguard your data when you use our website.
+          Join Diceymio for thrilling game sessions, live demos, and exclusive
+          playtests that unite players of all skill levels for unforgettable
+          fun.
         </p>
       </div>
     </div>

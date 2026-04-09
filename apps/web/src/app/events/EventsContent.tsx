@@ -107,7 +107,7 @@ function EventCard({ event }: { event: EventItem }) {
     <div className="bg-black border-2 border-b-[5px] border-[#9A7C50] rounded-2xl overflow-hidden p-5 transition-all group">
       <div className="flex flex-col sm:flex-row sm:items-center gap-5 lg:gap-6">
         {/* Image Container */}
-        <div className="relative w-full sm:w-[193px] h-[181px] shrink-0 overflow-hidden rounded-xl border border-white/5">
+        <div className="relative w-full sm:w-48.25 h-45.25 shrink-0 overflow-hidden rounded-xl border border-white/5">
           <Image
             src={event.image}
             alt={event.title}
@@ -128,7 +128,7 @@ function EventCard({ event }: { event: EventItem }) {
             <h3 className="text-base sm:text-xl font-semibold text-[#FEF5DE]">
               {event.title}
             </h3>
-            <p className="text-[#FEF5DECC] text-xs sm:max-w-[340px]">
+            <p className="text-[#FEF5DECC] text-xs sm:max-w-85">
               {event.description}
             </p>
           </div>

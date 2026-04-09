@@ -2,6 +2,13 @@ import prisma from "../../config/database";
 import { BadRequestError, NotFoundError } from "../../utils/errors";
 import { AddToCartInput, UpdateCartItemInput } from "./cart.validation";
 
+const ensureUserExists = async (userId: string) => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+};
+
 export const getCart = async (userId: string) => {
   let cart = await prisma.cart.findUnique({
     where: { userId },
@@ -13,8 +20,14 @@ export const getCart = async (userId: string) => {
   });
 
   if (!cart) {
+    await ensureUserExists(userId);
+
     cart = await prisma.cart.create({
-      data: { userId },
+      data: {
+        user: {
+          connect: { id: userId },
+        },
+      },
       include: {
         items: {
           include: { product: true },
@@ -46,8 +59,14 @@ export const addToCart = async (userId: string, input: AddToCartInput) => {
   });
 
   if (!cart) {
+    await ensureUserExists(userId);
+
     cart = await prisma.cart.create({
-      data: { userId },
+      data: {
+        user: {
+          connect: { id: userId },
+        },
+      },
     });
   }
 

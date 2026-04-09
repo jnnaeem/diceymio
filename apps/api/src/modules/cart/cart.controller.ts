@@ -10,12 +10,12 @@ import {
   removeFromCart,
 } from "./cart.service";
 
-export const getCartController = asyncHandler(async (req: any, res) => {
+export const getCartController = asyncHandler(async (req: AuthRequest, res) => {
   const cart = await getCart(req.user.userId);
   sendSuccess(res, 200, cart, "Cart retrieved successfully");
 });
 
-export const addToCartController = asyncHandler(async (req: any, res) => {
+export const addToCartController = asyncHandler(async (req: AuthRequest, res) => {
   const result = addToCartSchema.safeParse(req.body);
 
   if (!result.success) {
@@ -26,7 +26,7 @@ export const addToCartController = asyncHandler(async (req: any, res) => {
   sendSuccess(res, 201, cartItem, "Item added to cart successfully");
 });
 
-export const updateCartItemController = asyncHandler(async (req: any, res) => {
+export const updateCartItemController = asyncHandler(async (req: AuthRequest, res) => {
   const result = updateCartItemSchema.safeParse(req.body);
 
   if (!result.success) {
@@ -41,7 +41,7 @@ export const updateCartItemController = asyncHandler(async (req: any, res) => {
   sendSuccess(res, 200, cartItem, "Cart item updated successfully");
 });
 
-export const removeFromCartController = asyncHandler(async (req: any, res) => {
+export const removeFromCartController = asyncHandler(async (req: AuthRequest, res) => {
   await removeFromCart(req.user.userId, req.params.id);
   sendSuccess(res, 204, null, "Item removed from cart successfully");
 });

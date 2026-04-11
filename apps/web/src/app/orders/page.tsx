@@ -14,7 +14,11 @@ import useSWR from "swr";
 export default function OrdersPage() {
   const router = useRouter();
   const { user, restoreFromStorage } = useAuthStore();
-  const { data: orders = [], error, isLoading: loading } = useSWR<Order[]>(user ? 'storefrontOrders' : null, orderAPI.getOrders);
+  const {
+    data: orders = [],
+    error,
+    isLoading: loading,
+  } = useSWR<Order[]>(user ? "storefrontOrders" : null, orderAPI.getOrders);
   const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
@@ -31,7 +35,7 @@ export default function OrdersPage() {
   if (authLoading || loading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-svh bg-white">
       {/* Navigation */}
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

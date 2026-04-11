@@ -18,8 +18,12 @@ export default function ProductsPage() {
   const { user, restoreFromStorage } = useAuthStore();
   const { addItem, updateQuantity } = useCartStore();
   const { onOpen } = useCartSheetStore();
-  
-  const { data: products = [], error, isLoading: loading } = useSWR<Product[]>('storefrontProducts', productAPI.getAll);
+
+  const {
+    data: products = [],
+    error,
+    isLoading: loading,
+  } = useSWR<Product[]>("storefrontProducts", productAPI.getAll);
 
   useEffect(() => {
     restoreFromStorage();
@@ -57,7 +61,7 @@ export default function ProductsPage() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-svh bg-white">
       {/* Navigation */}
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

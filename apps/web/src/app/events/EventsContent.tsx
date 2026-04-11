@@ -65,7 +65,7 @@ const endedEvents: EventItem[] = [
 
 export function EventsContent() {
   return (
-    <div className="relative overflow-hidden min-h-screen py-16 lg:py-24">
+    <div className="relative overflow-hidden min-h-svh py-16 lg:py-24">
       {/* Background Image */}
       <div
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"

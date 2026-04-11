@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Check, CircleCheckBig } from "lucide-react";
+import { CircleCheckBig } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function OrderConfirmationPage() {
@@ -12,7 +12,7 @@ export default function OrderConfirmationPage() {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden py-24">
+    <div className="relative min-h-svh w-full flex flex-col items-center justify-center overflow-hidden py-24">
       {/* Background Image */}
       <div
         className="absolute inset-0 z-0 bg-cover bg-center md:bg-bottom bg-no-repeat"

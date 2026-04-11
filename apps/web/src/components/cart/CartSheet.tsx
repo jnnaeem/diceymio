@@ -14,8 +14,10 @@ import { Minus, Plus, Trash2, X, Ticket, BadgePercent } from "lucide-react";
 import { toast } from "sonner";
 import { cartAPI, couponAPI } from "@/lib/services";
 import { useAuthStore } from "@/store/authStore";
+import { useRouter } from "next/navigation";
 
 export default function CartSheet() {
+  const router = useRouter();
   const { isOpen, onClose } = useCartSheetStore();
   const {
     items,
@@ -100,7 +102,8 @@ export default function CartSheet() {
   };
 
   const handlePlaceOrder = () => {
-    toast.info("Checkout feature is coming soon!");
+    onClose();
+    router.push("/checkout");
   };
 
   const subtotal = getSubtotal();
@@ -292,7 +295,7 @@ export default function CartSheet() {
               onClick={handlePlaceOrder}
               className="w-full bg-[#E5E961] hover:bg-[#D4D84F] text-[#0A140F] font-black py-4 rounded-xl transition-all active:scale-95 shadow-[0_0_20px_rgba(229,233,97,0.15)] uppercase tracking-wider text-xs cursor-pointer"
             >
-              Place Order (COD)
+              Checkout
             </button>
           </div>
         )}

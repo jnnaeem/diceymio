@@ -38,7 +38,7 @@ export default function Home() {
   }, [error]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-svh">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 glass border-b border-gray-200/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

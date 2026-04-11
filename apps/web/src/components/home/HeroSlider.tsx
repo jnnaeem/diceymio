@@ -68,7 +68,7 @@ export function HeroSlider() {
   }, [emblaApi, setScrollSnaps, onSelect]);
 
   return (
-    <section className="relative w-full h-[600px] md:h-[700px] overflow-hidden">
+    <section className="relative w-full h-150 md:h-175 overflow-hidden">
       <div className="overflow-hidden h-full" ref={emblaRef}>
         <div className="flex h-full">
           {SLIDES.map((slide) => (
@@ -116,7 +116,7 @@ export function HeroSlider() {
 
                   {/* Right Side: Product Image */}
                   <div className="hidden lg:flex justify-center items-center animate-fade-in-right">
-                    <div className="relative w-[400px] h-[550px] transform hover:rotate-2 transition-transform duration-500">
+                    <div className="relative w-100 h-137.5 transform hover:rotate-2 transition-transform duration-500">
                       <Image
                         src={slide.image}
                         alt={slide.title}

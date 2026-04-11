@@ -66,8 +66,8 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-linear-to-br from-[#0B1C13] to-[#0B1C13] overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    <footer className="bg-linear-to-br from-[#0B1C13] to-[#0B1C13] overflow-hidden px-6">
+      <div className="max-w-7xl mx-auto">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 sm:py-16 py-10 lg:py-20">
           {/* Brand Column */}
